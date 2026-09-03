@@ -8,167 +8,254 @@
 <style>
 :root {
   --bg: #0a0b0f;
+  --bg-2: #0f1015;
   --surface: #13141a;
   --surface-2: #1a1c25;
+  --surface-3: #22242f;
   --border: #2a2d3a;
+  --border-subtle: #1e2029;
   --text: #e4e6eb;
   --text-muted: #9ca0ac;
   --text-dim: #6b6f7d;
   --accent: #818cf8;
   --accent-hover: #6366f1;
   --accent-bg: rgba(129, 140, 248, 0.12);
+  --accent-glow: rgba(129, 140, 248, 0.25);
   --green: #34d399;
   --red: #fb7185;
   --orange: #fb923c;
   --cyan: #22d3ee;
   --purple: #c084fc;
-  --radius: 14px;
-  --radius-sm: 10px;
+  --radius: 16px;
+  --radius-sm: 12px;
+  --radius-xs: 8px;
   --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", sans-serif;
-  --mono: "SF Mono", "Fira Code", "JetBrains Mono", monospace;
+  --mono: "SF Mono", "Fira Code", "JetBrains Mono", "Cascadia Code", monospace;
   --shadow: 0 2px 8px rgba(0,0,0,0.3);
-  --shadow-lg: 0 8px 32px rgba(0,0,0,0.4);
-  --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.35);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.45);
+  --shadow-glow: 0 0 40px var(--accent-glow);
+  --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-bounce: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 [data-theme="light"] {
   --bg: #faf9f7;
+  --bg-2: #f5f4f1;
   --surface: #ffffff;
   --surface-2: #f3f2ef;
-  --border: #e5e3df;
+  --surface-3: #eae9e5;
+  --border: #e0ddd7;
+  --border-subtle: #edebe7;
   --text: #1a1c25;
   --text-muted: #5c6070;
   --text-dim: #9ca0ac;
   --accent-bg: rgba(129, 140, 248, 0.1);
+  --accent-glow: rgba(129, 140, 248, 0.15);
   --shadow: 0 2px 8px rgba(0,0,0,0.06);
-  --shadow-lg: 0 8px 32px rgba(0,0,0,0.1);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.12);
+  --shadow-glow: 0 0 40px var(--accent-glow);
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { background: var(--bg); color: var(--text); font-family: var(--font); -webkit-font-smoothing: antialiased; line-height: 1.6; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: var(--font); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; line-height: 1.6; overflow-x: hidden; }
 a { color: var(--accent); text-decoration: none; transition: var(--transition); }
 a:hover { color: var(--accent-hover); }
+::selection { background: var(--accent-bg); }
 
-/* Nav */
-.nav { position: sticky; top: 0; z-index: 100; background: rgba(10, 11, 15, 0.8); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
-[data-theme="light"] .nav { background: rgba(250, 249, 247, 0.8); }
-.nav-inner { max-width: 1100px; margin: 0 auto; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; }
-.nav-brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 16px; }
-.nav-brand img { width: 32px; height: 32px; }
-.nav-links { display: flex; align-items: center; gap: 28px; }
-.nav-links a { color: var(--text-muted); font-size: 14px; font-weight: 500; }
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
+
+/* ===== Scroll animation classes ===== */
+.reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.7s cubic-bezier(0.4,0,0.2,1), transform 0.7s cubic-bezier(0.4,0,0.2,1); }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+.reveal-delay-5 { transition-delay: 0.5s; }
+.reveal-scale { opacity: 0; transform: scale(0.95); transition: opacity 0.6s ease, transform 0.6s ease; }
+.reveal-scale.visible { opacity: 1; transform: scale(1); }
+.reveal-left { opacity: 0; transform: translateX(-30px); transition: opacity 0.7s ease, transform 0.7s ease; }
+.reveal-left.visible { opacity: 1; transform: translateX(0); }
+.reveal-right { opacity: 0; transform: translateX(30px); transition: opacity 0.7s ease, transform 0.7s ease; }
+.reveal-right.visible { opacity: 1; transform: translateX(0); }
+
+/* ===== Nav ===== */
+.nav { position: sticky; top: 0; z-index: 100; background: rgba(10, 11, 15, 0.72); backdrop-filter: blur(16px) saturate(180%); -webkit-backdrop-filter: blur(16px) saturate(180%); border-bottom: 1px solid var(--border-subtle); transition: var(--transition); }
+[data-theme="light"] .nav { background: rgba(250, 249, 247, 0.72); }
+.nav.scrolled { border-bottom-color: var(--border); box-shadow: var(--shadow); }
+.nav-inner { max-width: 1140px; margin: 0 auto; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; }
+.nav-brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 15px; color: var(--text); }
+.nav-brand img { width: 30px; height: 30px; transition: var(--transition-bounce); }
+.nav-brand:hover img { transform: rotate(-5deg) scale(1.1); }
+.nav-links { display: flex; align-items: center; gap: 32px; }
+.nav-links a { color: var(--text-muted); font-size: 14px; font-weight: 500; position: relative; }
+.nav-links a::after { content: ""; position: absolute; bottom: -4px; left: 0; width: 0; height: 2px; background: var(--accent); border-radius: 2px; transition: width 0.3s ease; }
 .nav-links a:hover { color: var(--text); }
-.nav-cta { display: flex; align-items: center; gap: 12px; }
-.theme-btn { width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: var(--transition); }
-.theme-btn:hover { color: var(--text); border-color: var(--text-dim); }
-.btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 600; cursor: pointer; transition: var(--transition); border: none; font-family: var(--font); }
-.btn-primary { background: var(--accent); color: #fff; }
-.btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); }
+.nav-links a:hover::after { width: 100%; }
+.nav-cta { display: flex; align-items: center; gap: 10px; }
+.theme-btn { width: 36px; height: 36px; border-radius: var(--radius-xs); border: 1px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: var(--transition); }
+.theme-btn:hover { color: var(--text); border-color: var(--text-dim); background: var(--surface-2); }
+.theme-btn svg { transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.theme-btn:hover svg { transform: rotate(20deg) scale(1.1); }
+
+/* ===== Buttons ===== */
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 22px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 600; cursor: pointer; transition: var(--transition); border: none; font-family: var(--font); text-decoration: none; }
+.btn-primary { background: var(--accent); color: #fff; box-shadow: 0 4px 14px var(--accent-glow); }
+.btn-primary:hover { background: var(--accent-hover); transform: translateY(-2px); box-shadow: 0 6px 20px var(--accent-glow); }
+.btn-primary:active { transform: translateY(0); }
 .btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
-.btn-ghost:hover { border-color: var(--text-dim); background: var(--surface-2); }
+.btn-ghost:hover { border-color: var(--text-dim); background: var(--surface-2); transform: translateY(-1px); }
+.btn-lg { padding: 14px 30px; font-size: 15px; }
 
-/* Hero */
-.hero { max-width: 1100px; margin: 0 auto; padding: 80px 24px 60px; text-align: center; }
-.hero-badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 20px; background: var(--accent-bg); color: var(--accent); font-size: 13px; font-weight: 600; margin-bottom: 24px; }
+/* ===== Hero ===== */
+.hero { position: relative; max-width: 1140px; margin: 0 auto; padding: 100px 24px 80px; text-align: center; }
+.hero-bg { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 600px; height: 400px; background: radial-gradient(ellipse at center, var(--accent-glow), transparent 70%); pointer-events: none; opacity: 0.6; }
+.hero-badge { display: inline-flex; align-items: center; gap: 8px; padding: 7px 16px; border-radius: 20px; background: var(--accent-bg); color: var(--accent); font-size: 13px; font-weight: 600; margin-bottom: 28px; border: 1px solid var(--accent-bg); }
 .hero-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
-@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-.hero h1 { font-size: 52px; font-weight: 800; letter-spacing: -2px; line-height: 1.1; margin-bottom: 20px; }
-.hero h1 .grad { background: linear-gradient(135deg, var(--accent), var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-.hero p { font-size: 20px; color: var(--text-muted); max-width: 620px; margin: 0 auto 36px; line-height: 1.6; }
+@keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.8); } }
+.hero h1 { font-size: 56px; font-weight: 800; letter-spacing: -2.5px; line-height: 1.08; margin-bottom: 24px; }
+.hero h1 .grad { background: linear-gradient(135deg, var(--accent) 0%, var(--cyan) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.hero p { font-size: 20px; color: var(--text-muted); max-width: 640px; margin: 0 auto 40px; line-height: 1.6; }
 .hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-.hero-actions .btn { padding: 14px 28px; font-size: 15px; }
-.hero-install { margin-top: 32px; display: inline-flex; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 20px; font-family: var(--mono); font-size: 14px; }
-.hero-install code { color: var(--accent); }
-.hero-install .copy-btn { background: transparent; border: none; color: var(--text-dim); cursor: pointer; padding: 4px 8px; border-radius: 6px; transition: var(--transition); font-size: 13px; }
-.hero-install .copy-btn:hover { color: var(--text); background: var(--surface-2); }
 
-/* Screenshots grid */
-.screenshots { max-width: 1100px; margin: 0 auto; padding: 40px 24px 80px; }
-.screenshots h2 { text-align: center; font-size: 32px; font-weight: 700; letter-spacing: -1px; margin-bottom: 12px; }
-.screenshots .sub { text-align: center; color: var(--text-muted); font-size: 16px; margin-bottom: 48px; }
+/* Install box */
+.install-box { margin-top: 40px; max-width: 560px; margin-left: auto; margin-right: auto; }
+.install-row { display: flex; align-items: center; gap: 0; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 4px 4px 4px 20px; transition: var(--transition); }
+.install-row:hover { border-color: var(--text-dim); box-shadow: var(--shadow-md); }
+.install-row code { flex: 1; font-family: var(--mono); font-size: 14px; color: var(--accent); text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.copy-btn { flex-shrink: 0; background: var(--surface-2); border: 1px solid var(--border); color: var(--text-muted); cursor: pointer; padding: 10px 18px; border-radius: var(--radius-xs); transition: var(--transition); font-size: 13px; font-weight: 600; font-family: var(--font); display: flex; align-items: center; gap: 6px; }
+.copy-btn:hover { color: var(--text); border-color: var(--text-dim); background: var(--surface-3); }
+.copy-btn.copied { color: var(--green); border-color: var(--green); background: rgba(52, 211, 153, 0.1); }
+.copy-btn svg { width: 14px; height: 14px; }
+
+/* Prompt box */
+.prompt-box { margin-top: 12px; }
+.prompt-toggle { display: flex; align-items: center; gap: 6px; color: var(--text-dim); font-size: 13px; cursor: pointer; background: none; border: none; font-family: var(--font); padding: 8px 16px; margin: 0 auto; transition: var(--transition); }
+.prompt-toggle:hover { color: var(--text-muted); }
+.prompt-toggle svg { transition: transform 0.3s ease; }
+.prompt-toggle.open svg { transform: rotate(180deg); }
+.prompt-content { max-height: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+.prompt-content.open { max-height: 300px; }
+.prompt-inner { margin-top: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 20px; text-align: left; }
+.prompt-inner .label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-dim); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+.prompt-inner .label svg { width: 14px; height: 14px; }
+.prompt-inner pre { font-family: var(--mono); font-size: 13px; color: var(--text-muted); line-height: 1.7; white-space: pre-wrap; word-break: break-word; margin-bottom: 14px; }
+.prompt-inner pre .hl { color: var(--accent); }
+.prompt-inner .copy-btn { width: 100%; justify-content: center; }
+
+/* ===== Section headers ===== */
+.section { max-width: 1140px; margin: 0 auto; padding: 100px 24px; }
+.section-head { text-align: center; margin-bottom: 56px; }
+.section-head .eyebrow { display: inline-block; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--accent); margin-bottom: 12px; }
+.section-head h2 { font-size: 36px; font-weight: 800; letter-spacing: -1.5px; line-height: 1.15; margin-bottom: 14px; }
+.section-head .sub { font-size: 17px; color: var(--text-muted); max-width: 560px; margin: 0 auto; }
+
+/* ===== Screenshots ===== */
 .ss-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-.ss-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; transition: var(--transition); }
-.ss-card:hover { border-color: var(--accent); transform: translateY(-4px); box-shadow: var(--shadow-lg); }
-.ss-card img { width: 100%; display: block; aspect-ratio: 16/10; object-fit: cover; object-position: top; }
-.ss-card-body { padding: 20px 24px; }
-.ss-card-body h3 { font-size: 18px; font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
-.ss-card-body .tag { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px; }
-.ss-card-body .tag.audit { background: rgba(251, 113, 133, 0.15); color: var(--red); }
-.ss-card-body .tag.status { background: var(--accent-bg); color: var(--accent); }
-.ss-card-body .tag.checklist { background: rgba(52, 211, 153, 0.15); color: var(--green); }
-.ss-card-body .tag.comparison { background: rgba(192, 132, 252, 0.15); color: var(--purple); }
-.ss-card-body p { color: var(--text-muted); font-size: 14px; line-height: 1.5; }
+.ss-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; transition: var(--transition); cursor: pointer; }
+.ss-card:hover { border-color: var(--accent); transform: translateY(-6px); box-shadow: var(--shadow-lg); }
+.ss-card-img { position: relative; overflow: hidden; }
+.ss-card img { width: 100%; display: block; aspect-ratio: 16/10; object-fit: cover; object-position: top; transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+.ss-card:hover img { transform: scale(1.03); }
+.ss-card-body { padding: 24px 28px; }
+.ss-card-body h3 { font-size: 19px; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+.ss-card-body .tag { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px; }
+.tag.audit { background: rgba(251, 113, 133, 0.15); color: var(--red); }
+.tag.status { background: var(--accent-bg); color: var(--accent); }
+.tag.checklist { background: rgba(52, 211, 153, 0.15); color: var(--green); }
+.tag.comparison { background: rgba(192, 132, 252, 0.15); color: var(--purple); }
+.ss-card-body p { color: var(--text-muted); font-size: 14px; line-height: 1.55; }
 
-/* Features */
-.features { max-width: 1100px; margin: 0 auto; padding: 80px 24px; }
-.features h2 { text-align: center; font-size: 32px; font-weight: 700; letter-spacing: -1px; margin-bottom: 12px; }
-.features .sub { text-align: center; color: var(--text-muted); font-size: 16px; margin-bottom: 48px; }
+/* ===== Features ===== */
 .feat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-.feat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px 24px; transition: var(--transition); }
-.feat:hover { border-color: var(--text-dim); transform: translateY(-2px); }
-.feat-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
-.feat-icon svg { width: 22px; height: 22px; }
+.feat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px 28px; transition: var(--transition); position: relative; overflow: hidden; }
+.feat::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--accent), transparent); opacity: 0; transition: opacity 0.3s ease; }
+.feat:hover { border-color: var(--text-dim); transform: translateY(-4px); box-shadow: var(--shadow-md); }
+.feat:hover::before { opacity: 1; }
+.feat-icon { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; margin-bottom: 18px; transition: var(--transition-bounce); }
+.feat:hover .feat-icon { transform: scale(1.1) rotate(-5deg); }
+.feat-icon svg { width: 24px; height: 24px; }
 .feat-icon.indigo { background: var(--accent-bg); color: var(--accent); }
 .feat-icon.green { background: rgba(52, 211, 153, 0.15); color: var(--green); }
 .feat-icon.red { background: rgba(251, 113, 133, 0.15); color: var(--red); }
 .feat-icon.cyan { background: rgba(34, 211, 238, 0.15); color: var(--cyan); }
 .feat-icon.purple { background: rgba(192, 132, 252, 0.15); color: var(--purple); }
 .feat-icon.orange { background: rgba(251, 146, 60, 0.15); color: var(--orange); }
-.feat h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
-.feat p { color: var(--text-muted); font-size: 14px; line-height: 1.5; }
+.feat h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+.feat p { color: var(--text-muted); font-size: 14px; line-height: 1.55; }
 
-/* Templates section */
-.templates { max-width: 1100px; margin: 0 auto; padding: 80px 24px; }
-.templates h2 { text-align: center; font-size: 32px; font-weight: 700; letter-spacing: -1px; margin-bottom: 12px; }
-.templates .sub { text-align: center; color: var(--text-muted); font-size: 16px; margin-bottom: 48px; }
+/* ===== Templates ===== */
 .tpl-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-.tpl { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 20px; transition: var(--transition); }
-.tpl:hover { border-color: var(--accent); }
-.tpl-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; font-size: 18px; }
-.tpl h4 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
-.tpl p { font-size: 12px; color: var(--text-dim); }
-.tpl-code { margin-top: 10px; font-family: var(--mono); font-size: 11px; color: var(--accent); background: var(--surface-2); padding: 4px 8px; border-radius: 6px; display: inline-block; }
+.tpl { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 24px 20px; transition: var(--transition); position: relative; }
+.tpl:hover { border-color: var(--accent); transform: translateY(-3px); box-shadow: var(--shadow-md); }
+.tpl-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 14px; transition: var(--transition-bounce); }
+.tpl:hover .tpl-icon { transform: scale(1.1); }
+.tpl h4 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+.tpl p { font-size: 12px; color: var(--text-dim); line-height: 1.5; margin-bottom: 12px; }
+.tpl-code { font-family: var(--mono); font-size: 11px; color: var(--accent); background: var(--surface-2); padding: 5px 10px; border-radius: 6px; display: inline-block; border: 1px solid var(--border-subtle); }
 
-/* How it works */
-.how { max-width: 1100px; margin: 0 auto; padding: 80px 24px; }
-.how h2 { text-align: center; font-size: 32px; font-weight: 700; letter-spacing: -1px; margin-bottom: 12px; }
-.how .sub { text-align: center; color: var(--text-muted); font-size: 16px; margin-bottom: 48px; }
+/* ===== How it works ===== */
 .how-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; position: relative; }
-.how-step { text-align: center; }
-.how-step-num { width: 48px; height: 48px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 20px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; }
-.how-step h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
-.how-step p { color: var(--text-muted); font-size: 14px; line-height: 1.5; }
-.how-step .code { margin-top: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 16px; font-family: var(--mono); font-size: 12px; text-align: left; color: var(--text-muted); overflow-x: auto; }
+.how-step { text-align: center; padding: 0 8px; }
+.how-step-num { width: 52px; height: 52px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 22px; font-weight: 800; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; box-shadow: 0 4px 20px var(--accent-glow); transition: var(--transition-bounce); }
+.how-step:hover .how-step-num { transform: scale(1.1); }
+.how-step h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+.how-step p { color: var(--text-muted); font-size: 14px; line-height: 1.55; margin-bottom: 16px; }
+.how-step .code { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px 18px; font-family: var(--mono); font-size: 12px; text-align: left; color: var(--text-muted); overflow-x: auto; line-height: 1.7; }
 .how-step .code .k { color: var(--accent); }
 .how-step .code .s { color: var(--green); }
+.how-step .code .c { color: var(--text-dim); }
 
-/* CTA */
-.cta { max-width: 800px; margin: 80px auto; padding: 60px 24px; text-align: center; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
-.cta h2 { font-size: 28px; font-weight: 700; margin-bottom: 12px; }
-.cta p { color: var(--text-muted); font-size: 16px; margin-bottom: 28px; }
-.cta .btn { padding: 14px 32px; font-size: 15px; }
+/* ===== CTA ===== */
+.cta-section { padding: 80px 24px; }
+.cta { max-width: 800px; margin: 0 auto; padding: 64px 40px; text-align: center; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); position: relative; overflow: hidden; }
+.cta::before { content: ""; position: absolute; top: -50%; left: 50%; transform: translateX(-50%); width: 400px; height: 300px; background: radial-gradient(ellipse at center, var(--accent-glow), transparent 70%); pointer-events: none; }
+.cta h2 { font-size: 30px; font-weight: 800; letter-spacing: -1px; margin-bottom: 14px; position: relative; }
+.cta p { color: var(--text-muted); font-size: 17px; margin-bottom: 32px; position: relative; }
+.cta-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; position: relative; }
 
-/* Footer */
-.footer { border-top: 1px solid var(--border); padding: 40px 24px; }
-.footer-inner { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+/* ===== Footer ===== */
+.footer { border-top: 1px solid var(--border); padding: 48px 24px; background: var(--bg-2); }
+.footer-inner { max-width: 1140px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
 .footer-brand { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 14px; }
 .footer-brand img { width: 28px; height: 28px; }
-.footer-links { display: flex; gap: 24px; }
-.footer-links a { color: var(--text-dim); font-size: 13px; }
+.footer-links { display: flex; gap: 28px; }
+.footer-links a { color: var(--text-dim); font-size: 13px; font-weight: 500; }
 .footer-links a:hover { color: var(--text); }
 .footer-copy { color: var(--text-dim); font-size: 13px; }
 
-@media (max-width: 768px) {
-  .hero h1 { font-size: 36px; }
-  .hero p { font-size: 17px; }
-  .ss-grid, .feat-grid, .how-steps { grid-template-columns: 1fr; }
+/* ===== Responsive ===== */
+@media (max-width: 900px) {
+  .feat-grid { grid-template-columns: 1fr 1fr; }
   .tpl-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 768px) {
+  .hero { padding: 60px 24px 40px; }
+  .hero h1 { font-size: 38px; letter-spacing: -1.5px; }
+  .hero p { font-size: 17px; }
+  .section { padding: 60px 24px; }
+  .section-head h2 { font-size: 28px; }
+  .ss-grid, .feat-grid, .how-steps { grid-template-columns: 1fr; }
+  .tpl-grid { grid-template-columns: 1fr; }
   .nav-links { display: none; }
+  .cta { padding: 40px 24px; }
+  .cta h2 { font-size: 24px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal, .reveal-scale, .reveal-left, .reveal-right { opacity: 1; transform: none; transition: none; }
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
 </style>
 </head>
 <body>
 
 <!-- Nav -->
-<nav class="nav">
+<nav class="nav" id="nav">
   <div class="nav-inner">
     <a href="#" class="nav-brand">
       <img src="assets/logo/logo-nobg.png" alt="Findings Visualizer">
@@ -181,7 +268,7 @@ a:hover { color: var(--accent-hover); }
       <a href="#how">How it works</a>
     </div>
     <div class="nav-cta">
-      <button class="theme-btn" onclick="toggleTheme()" title="Toggle theme">
+      <button class="theme-btn" onclick="toggleTheme()" title="Toggle theme" aria-label="Toggle theme">
         <svg id="icon-dark" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
         <svg id="icon-light" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
       </button>
@@ -193,50 +280,90 @@ a:hover { color: var(--accent-hover); }
 
 <!-- Hero -->
 <section class="hero">
-  <div class="hero-badge"><span class="dot"></span> v1.1.0 now available</div>
-  <h1>Turn any report into an<br><span class="grad">interactive dashboard</span></h1>
-  <p>A Claude Code and Devin skill that transforms structured data into polished, self-contained HTML dashboards. Security audits, feature trackers, release checklists, tool comparisons. No server, no dependencies, no build step.</p>
-  <div class="hero-actions">
-    <a href="#install" class="btn btn-primary">
+  <div class="hero-bg"></div>
+  <div class="hero-badge reveal"><span class="dot"></span> v1.1.0 now available</div>
+  <h1 class="reveal reveal-delay-1">Turn any report into an<br><span class="grad">interactive dashboard</span></h1>
+  <p class="reveal reveal-delay-2">A Claude Code and Devin skill that transforms structured data into polished, self-contained HTML dashboards. Security audits, feature trackers, release checklists, tool comparisons. No server, no dependencies, no build step.</p>
+  <div class="hero-actions reveal reveal-delay-3">
+    <a href="#install" class="btn btn-primary btn-lg">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
       Install the skill
     </a>
-    <a href="#screenshots" class="btn btn-ghost">See examples</a>
+    <a href="#screenshots" class="btn btn-ghost btn-lg">See examples</a>
   </div>
-  <div class="hero-install" id="install">
-    <code>npx skills add neang-mengseang/findings-visualizer</code>
-    <button class="copy-btn" onclick="copyInstall(this)">Copy</button>
+
+  <!-- Install box -->
+  <div class="install-box reveal reveal-delay-4" id="install">
+    <div class="install-row">
+      <code>npx skills add neang-mengseang/findings-visualizer</code>
+      <button class="copy-btn" onclick="copyText(this, 'npx skills add neang-mengseang/findings-visualizer')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        <span>Copy</span>
+      </button>
+    </div>
+
+    <!-- Copy Prompt toggle -->
+    <div class="prompt-box">
+      <button class="prompt-toggle" onclick="togglePrompt(this)" id="prompt-toggle">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        <span>Prefer your AI to install it? Copy a prompt instead</span>
+      </button>
+      <div class="prompt-content" id="prompt-content">
+        <div class="prompt-inner">
+          <div class="label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Paste this into Claude Code, Devin, Cursor, or any AI agent
+          </div>
+<pre><span class="hl">Install the findings-visualizer skill by running this command:</span>
+
+npx skills add neang-mengseang/findings-visualizer
+
+<span class="hl">After installing, I can ask you to visualize reports by saying
+things like "turn these findings into a visual report" or
+"make a status dashboard for these features". The skill
+supports security audits, feature trackers, release checklists,
+and tool comparisons.</span></pre>
+          <button class="copy-btn" onclick="copyText(this, document.getElementById('prompt-text').textContent)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            <span>Copy prompt</span>
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
 <!-- Screenshots -->
-<section class="screenshots" id="screenshots">
-  <h2>Four report types, one tool</h2>
-  <p class="sub">Each report type auto-detects the right components from your data shape</p>
+<section class="section" id="screenshots">
+  <div class="section-head reveal">
+    <span class="eyebrow">Showcase</span>
+    <h2>Four report types, one tool</h2>
+    <p class="sub">Each report type auto-detects the right components from your data shape. Or mix them freely.</p>
+  </div>
   <div class="ss-grid">
-    <div class="ss-card">
-      <img src="examples/showcase-audit.png" alt="Security Audit Report">
+    <div class="ss-card reveal-scale">
+      <div class="ss-card-img"><img src="examples/showcase-audit.png" alt="Security Audit Report" loading="lazy"></div>
       <div class="ss-card-body">
         <h3>Security Audit <span class="tag audit">Audit</span></h3>
         <p>Severity-based findings with donut charts, category breakdowns, effort estimates, heatmap, and a pass/fail verdict banner.</p>
       </div>
     </div>
-    <div class="ss-card">
-      <img src="examples/showcase-status.png" alt="Feature Status Tracker">
+    <div class="ss-card reveal-scale reveal-delay-1">
+      <div class="ss-card-img"><img src="examples/showcase-status.png" alt="Feature Status Tracker" loading="lazy"></div>
       <div class="ss-card-body">
         <h3>Feature Status <span class="tag status">Status</span></h3>
         <p>Track features with status cards, progress bar, and expandable rows showing assignee, notes, tags, and due dates.</p>
       </div>
     </div>
-    <div class="ss-card">
-      <img src="examples/showcase-checklist.png" alt="Release Checklist">
+    <div class="ss-card reveal-scale reveal-delay-2">
+      <div class="ss-card-img"><img src="examples/showcase-checklist.png" alt="Release Checklist" loading="lazy"></div>
       <div class="ss-card-body">
         <h3>Release Checklist <span class="tag checklist">Checklist</span></h3>
         <p>Interactive checklist with circular progress ring, grouped items by category, and owner assignments with notes.</p>
       </div>
     </div>
-    <div class="ss-card">
-      <img src="examples/showcase-comparison.png" alt="Tool Comparison">
+    <div class="ss-card reveal-scale reveal-delay-3">
+      <div class="ss-card-img"><img src="examples/showcase-comparison.png" alt="Tool Comparison" loading="lazy"></div>
       <div class="ss-card-body">
         <h3>Tool Comparison <span class="tag comparison">Comparison</span></h3>
         <p>Score options across criteria with colored dots, summary cards, and detailed pros/cons for each alternative.</p>
@@ -246,91 +373,99 @@ a:hover { color: var(--accent-hover); }
 </section>
 
 <!-- Features -->
-<section class="features" id="features">
-  <h2>Everything you need to present data</h2>
-  <p class="sub">Thoughtful defaults, full control when you need it</p>
-  <div class="feat-grid">
-    <div class="feat">
-      <div class="feat-icon indigo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
-      <h3>Component-driven</h3>
-      <p>No rigid types. Components appear based on your data. Mix audits with checklists, comparisons with verdicts, any combination.</p>
+<section class="section" id="features" style="background: var(--bg-2); border-top: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle); max-width: 100%; margin: 0;">
+  <div style="max-width: 1140px; margin: 0 auto;">
+    <div class="section-head reveal">
+      <span class="eyebrow">Capabilities</span>
+      <h2>Everything you need to present data</h2>
+      <p class="sub">Thoughtful defaults, full control when you need it. 20 composable components, 7 templates, 6 color presets.</p>
     </div>
-    <div class="feat">
-      <div class="feat-icon green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
-      <h3>7 built-in templates</h3>
-      <p>Security audit, code review, feature status, release checklist, comparison, performance, architecture. Or skip templates entirely.</p>
-    </div>
-    <div class="feat">
-      <div class="feat-icon red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
-      <h3>Adaptive sidebar</h3>
-      <p>Live filters for severity, status, category, assignee, and owner. Mini progress ring and quick stats update in real time.</p>
-    </div>
-    <div class="feat">
-      <div class="feat-icon cyan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg></div>
-      <h3>Light and dark mode</h3>
-      <p>One-click theme toggle with circular reveal animation. 6 color presets with per-mode customization. Persists across sessions.</p>
-    </div>
-    <div class="feat">
-      <div class="feat-icon purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg></div>
-      <h3>Export anywhere</h3>
-      <p>Print to PDF with optimized stylesheet. Export raw JSON back from the page. Single self-contained HTML file, no dependencies.</p>
-    </div>
-    <div class="feat">
-      <div class="feat-icon orange"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div>
-      <h3>20 composable components</h3>
-      <p>Charts, cards, lists, tables, filters, banners, progress rings. Each is independent. Reorder, hide, or mix freely via config.</p>
+    <div class="feat-grid">
+      <div class="feat reveal">
+        <div class="feat-icon indigo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
+        <h3>Component-driven</h3>
+        <p>No rigid types. Components appear based on your data. Mix audits with checklists, comparisons with verdicts, any combination.</p>
+      </div>
+      <div class="feat reveal reveal-delay-1">
+        <div class="feat-icon green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+        <h3>7 built-in templates</h3>
+        <p>Security audit, code review, feature status, release checklist, comparison, performance, architecture. Or skip templates entirely.</p>
+      </div>
+      <div class="feat reveal reveal-delay-2">
+        <div class="feat-icon red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+        <h3>Adaptive sidebar</h3>
+        <p>Live filters for severity, status, category, assignee, and owner. Mini progress ring and quick stats update in real time.</p>
+      </div>
+      <div class="feat reveal">
+        <div class="feat-icon cyan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg></div>
+        <h3>Light and dark mode</h3>
+        <p>One-click theme toggle with circular reveal animation. 6 color presets with per-mode customization. Persists across sessions.</p>
+      </div>
+      <div class="feat reveal reveal-delay-1">
+        <div class="feat-icon purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg></div>
+        <h3>Export anywhere</h3>
+        <p>Print to PDF with optimized stylesheet. Export raw JSON back from the page. Single self-contained HTML file, no dependencies.</p>
+      </div>
+      <div class="feat reveal reveal-delay-2">
+        <div class="feat-icon orange"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div>
+        <h3>20 composable components</h3>
+        <p>Charts, cards, lists, tables, filters, banners, progress rings. Each is independent. Reorder, hide, or mix freely via config.</p>
+      </div>
     </div>
   </div>
 </section>
 
 <!-- Templates -->
-<section class="templates" id="templates">
-  <h2>Start fast with templates</h2>
-  <p class="sub">Optional shortcuts for common report types. Or let auto-detection handle it.</p>
+<section class="section" id="templates">
+  <div class="section-head reveal">
+    <span class="eyebrow">Quick start</span>
+    <h2>Start fast with templates</h2>
+    <p class="sub">Optional shortcuts for common report types. Or let auto-detection handle it. Three levels of control: auto, template, manual.</p>
+  </div>
   <div class="tpl-grid">
-    <div class="tpl">
+    <div class="tpl reveal">
       <div class="tpl-icon" style="background:rgba(251,113,133,0.15);color:var(--red)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
       <h4>security-audit</h4>
       <p>Penetration tests, vulnerability reports</p>
       <div class="tpl-code">"template": "security-audit"</div>
     </div>
-    <div class="tpl">
+    <div class="tpl reveal reveal-delay-1">
       <div class="tpl-icon" style="background:rgba(52,211,153,0.15);color:var(--green)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
       <h4>code-review</h4>
       <p>Code reviews, lint reports, tech debt</p>
       <div class="tpl-code">"template": "code-review"</div>
     </div>
-    <div class="tpl">
+    <div class="tpl reveal reveal-delay-2">
       <div class="tpl-icon" style="background:var(--accent-bg);color:var(--accent)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="9" y1="11" x2="9" y2="17"/><line x1="15" y1="11" x2="15" y2="17"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg></div>
       <h4>feature-status</h4>
       <p>Sprint boards, roadmaps, project status</p>
       <div class="tpl-code">"template": "feature-status"</div>
     </div>
-    <div class="tpl">
+    <div class="tpl reveal reveal-delay-3">
       <div class="tpl-icon" style="background:rgba(52,211,153,0.15);color:var(--green)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
       <h4>release-checklist</h4>
       <p>Release gates, QA checklists, deploy readiness</p>
       <div class="tpl-code">"template": "release-checklist"</div>
     </div>
-    <div class="tpl">
+    <div class="tpl reveal">
       <div class="tpl-icon" style="background:rgba(192,132,252,0.15);color:var(--purple)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/></svg></div>
       <h4>comparison</h4>
       <p>Tool selection, vendor evaluation, decisions</p>
       <div class="tpl-code">"template": "comparison"</div>
     </div>
-    <div class="tpl">
+    <div class="tpl reveal reveal-delay-1">
       <div class="tpl-icon" style="background:rgba(34,211,238,0.15);color:var(--cyan)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
       <h4>performance-audit</h4>
       <p>Load tests, performance reviews, benchmarks</p>
       <div class="tpl-code">"template": "performance-audit"</div>
     </div>
-    <div class="tpl">
+    <div class="tpl reveal reveal-delay-2">
       <div class="tpl-icon" style="background:rgba(192,132,252,0.15);color:var(--purple)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M3 7l9-4 9 4M5 21V7M19 21V7M9 21V11M15 21V11"/></svg></div>
       <h4>architecture-review</h4>
       <p>Architecture reviews, design audits</p>
       <div class="tpl-code">"template": "architecture-review"</div>
     </div>
-    <div class="tpl">
+    <div class="tpl reveal reveal-delay-3">
       <div class="tpl-icon" style="background:var(--surface-2);color:var(--text-dim)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
       <h4>auto-detect</h4>
       <p>No template? Just provide data. The right components appear automatically.</p>
@@ -340,45 +475,58 @@ a:hover { color: var(--accent-hover); }
 </section>
 
 <!-- How it works -->
-<section class="how" id="how">
-  <h2>How it works</h2>
-  <p class="sub">From data to dashboard in three steps</p>
-  <div class="how-steps">
-    <div class="how-step">
-      <div class="how-step-num">1</div>
-      <h3>Provide your data</h3>
-      <p>Write a simple JSON config with your findings, items, or comparison data. Or just paste data into the conversation.</p>
-      <div class="code">{
+<section class="section" id="how" style="background: var(--bg-2); border-top: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle); max-width: 100%; margin: 0;">
+  <div style="max-width: 1140px; margin: 0 auto;">
+    <div class="section-head reveal">
+      <span class="eyebrow">Workflow</span>
+      <h2>How it works</h2>
+      <p class="sub">From data to dashboard in three steps. No build pipeline, no server, no config files to maintain.</p>
+    </div>
+    <div class="how-steps">
+      <div class="how-step reveal">
+        <div class="how-step-num">1</div>
+        <h3>Provide your data</h3>
+        <p>Write a simple JSON config with your findings, items, or comparison data. Or just paste data into the conversation.</p>
+        <div class="code">{
   <span class="k">"title"</span>: <span class="s">"Security Audit"</span>,
   <span class="k">"findings"</span>: <span class="s">"findings.json"</span>,
   <span class="k">"template"</span>: <span class="s">"security-audit"</span>
 }</div>
-    </div>
-    <div class="how-step">
-      <div class="how-step-num">2</div>
-      <h3>Ask your AI agent</h3>
-      <p>Tell Claude Code or Devin to visualize the report. The skill handles component selection, theming, and layout automatically.</p>
-      <div class="code"><span class="s">"Turn the audit findings
+      </div>
+      <div class="how-step reveal reveal-delay-1">
+        <div class="how-step-num">2</div>
+        <h3>Ask your AI agent</h3>
+        <p>Tell Claude Code or Devin to visualize the report. The skill handles component selection, theming, and layout automatically.</p>
+        <div class="code"><span class="c">// just say:</span>
+<span class="s">"Turn the audit findings
  into a visual report"</span></div>
-    </div>
-    <div class="how-step">
-      <div class="how-step-num">3</div>
-      <h3>Get a dashboard</h3>
-      <p>A single self-contained HTML file opens in your browser. Share it, print it, attach it to a PR. No server needed.</p>
-      <div class="code">node build.js config.json
-  -o report.html --open</div>
+      </div>
+      <div class="how-step reveal reveal-delay-2">
+        <div class="how-step-num">3</div>
+        <h3>Get a dashboard</h3>
+        <p>A single self-contained HTML file opens in your browser. Share it, print it, attach it to a PR. No server needed.</p>
+        <div class="code"><span class="c">$</span> node build.js config.json
+  -o report.html --open
+
+<span class="c">// opens in browser</span></div>
+      </div>
     </div>
   </div>
 </section>
 
 <!-- CTA -->
-<section class="cta">
-  <h2>Ready to visualize your data?</h2>
-  <p>Install the skill and turn your next report into a dashboard in seconds.</p>
-  <a href="https://github.com/neang-mengseang/findings-visualizer" class="btn btn-primary">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
-    View on GitHub
-  </a>
+<section class="cta-section">
+  <div class="cta reveal-scale">
+    <h2>Ready to visualize your data?</h2>
+    <p>Install the skill and turn your next report into a dashboard in seconds.</p>
+    <div class="cta-actions">
+      <a href="https://github.com/neang-mengseang/findings-visualizer" class="btn btn-primary btn-lg">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+        View on GitHub
+      </a>
+      <a href="#install" class="btn btn-ghost btn-lg">Install now</a>
+    </div>
+  </div>
 </section>
 
 <!-- Footer -->
@@ -398,7 +546,15 @@ a:hover { color: var(--accent-hover); }
   </div>
 </footer>
 
+<!-- Hidden prompt text for copy -->
+<textarea id="prompt-text" style="position:absolute;left:-9999px;" readonly>Install the findings-visualizer skill by running this command:
+
+npx skills add neang-mengseang/findings-visualizer
+
+After installing, I can ask you to visualize reports by saying things like "turn these findings into a visual report" or "make a status dashboard for these features". The skill supports security audits, feature trackers, release checklists, and tool comparisons.</textarea>
+
 <script>
+// ===== Theme toggle =====
 function toggleTheme() {
   const current = document.documentElement.getAttribute("data-theme");
   const next = current === "light" ? "dark" : "light";
@@ -416,11 +572,48 @@ function toggleTheme() {
     document.getElementById("icon-light").style.display = "block";
   }
 })();
-function copyInstall(btn) {
-  navigator.clipboard.writeText("npx skills add neang-mengseang/findings-visualizer");
-  btn.textContent = "Copied!";
-  setTimeout(() => btn.textContent = "Copy", 2000);
+
+// ===== Nav scroll effect =====
+const nav = document.getElementById("nav");
+window.addEventListener("scroll", () => {
+  nav.classList.toggle("scrolled", window.scrollY > 20);
+}, { passive: true });
+
+// ===== Copy to clipboard =====
+function copyText(btn, text) {
+  navigator.clipboard.writeText(text).then(() => {
+    const span = btn.querySelector("span");
+    const original = span ? span.textContent : "";
+    btn.classList.add("copied");
+    if (span) span.textContent = "Copied!";
+    setTimeout(() => {
+      btn.classList.remove("copied");
+      if (span) span.textContent = original;
+    }, 2000);
+  });
 }
+
+// ===== Prompt toggle =====
+function togglePrompt(btn) {
+  const content = document.getElementById("prompt-content");
+  const isOpen = content.classList.toggle("open");
+  btn.classList.toggle("open", isOpen);
+  btn.querySelector("span").textContent = isOpen ? "Hide prompt" : "Prefer your AI to install it? Copy a prompt instead";
+}
+
+// ===== Scroll reveal animations =====
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add("visible");
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.12, rootMargin: "0px 0px -60px 0px" });
+
+document.querySelectorAll(".reveal, .reveal-scale, .reveal-left, .reveal-right").forEach(el => {
+  observer.observe(el);
+});
 </script>
 </body>
 </html>
