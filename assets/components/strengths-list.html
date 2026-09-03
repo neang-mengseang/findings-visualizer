@@ -1,0 +1,73 @@
+<!-- COMPONENT: strengths-list -->
+<!-- SLOT: COMPONENT_MAIN_BODY (before findings-list) -->
+<!-- DESCRIPTION: A collapsible section showing positive findings ("What's already solid"). Include when the report has a strengths/positives section. -->
+
+<!-- HTML -->
+<div class="strengths-section" id="strengths-section" style="display:none">
+  <div class="strengths-header" onclick="toggleStrengths(this)">
+    <svg class="strengths-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+    <h3 class="strengths-title">What's Already Solid</h3>
+    <span class="strengths-count" id="strengths-count"></span>
+    <svg class="chevron strengths-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+  </div>
+  <div class="strengths-body" id="strengths-body"></div>
+</div>
+
+<!-- CSS -->
+.strengths-section {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  overflow: hidden; margin-bottom: 24px; transition: var(--transition); box-shadow: var(--shadow);
+}
+.strengths-section:hover { border-color: var(--text-dim); box-shadow: var(--shadow-hover); }
+.strengths-section.expanded { box-shadow: var(--shadow-lg); }
+.strengths-header {
+  display: flex; align-items: center; gap: 10px; padding: 16px 20px; cursor: pointer; user-select: none;
+  transition: background var(--transition-fast);
+}
+.strengths-header:hover { background: var(--surface-hover); }
+.strengths-header:active { background: var(--border-subtle); }
+.strengths-icon { color: var(--low); flex-shrink: 0; transition: var(--transition); }
+.strengths-section:hover .strengths-icon { transform: scale(1.15); }
+.strengths-title { font-size: 15px; font-weight: 600; flex: 1; transition: color var(--transition); }
+.strengths-section:hover .strengths-title { color: var(--low-text); }
+.strengths-count {
+  font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 20px;
+  background: var(--low-bg); color: var(--low-text); transition: var(--transition);
+}
+.strengths-section:hover .strengths-count { transform: scale(1.05); }
+.strengths-chevron { color: var(--text-dim); transition: transform var(--transition-slow), color var(--transition); }
+.strengths-section.expanded .strengths-chevron { transform: rotate(90deg); color: var(--accent); }
+.strengths-body { display: none; padding: 0 20px 18px 48px; border-top: 1px solid var(--border-subtle); }
+.strengths-section.expanded .strengths-body { display: block; animation: fadeIn var(--transition-slow) ease-out; }
+.strength-item {
+  display: flex; align-items: flex-start; gap: 10px; padding: 12px 0;
+  border-bottom: 1px solid var(--border-subtle); font-size: 13px; line-height: 1.6;
+  transition: var(--transition); padding-left: 8px; padding-right: 8px; border-radius: var(--radius-sm);
+  animation: fadeInUp var(--transition) ease-out both;
+}
+.strength-item:hover { background: var(--surface-hover); }
+.strength-item:last-child { border-bottom: none; }
+.strength-item .check-dot {
+  width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0; margin-top: 2px;
+  background: var(--low-bg); display: flex; align-items: center; justify-content: center;
+  transition: var(--transition);
+}
+.strength-item:hover .check-dot { transform: scale(1.15); background: var(--low); }
+.strength-item:hover .check-dot svg { color: #fff; }
+.strength-item .check-dot svg { color: var(--low); transition: color var(--transition); }
+
+<!-- JS -->
+function renderStrengths() {
+  if (!STRENGTHS || STRENGTHS.length === 0) return;
+  document.getElementById("strengths-section").style.display = "block";
+  document.getElementById("strengths-count").textContent = STRENGTHS.length;
+  document.getElementById("strengths-body").innerHTML = STRENGTHS.map((s, i) => `
+    <div class="strength-item" style="animation-delay:${i * 0.04}s">
+      <span class="check-dot"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+      <span>${escapeHtml(typeof s === "string" ? s : s.text)}</span>
+    </div>
+  `).join("");
+}
+function toggleStrengths(header) {
+  header.parentElement.classList.toggle("expanded");
+}

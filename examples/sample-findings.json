@@ -1,0 +1,79 @@
+[
+  {
+    "id": "C1",
+    "title": "Double-booking race condition",
+    "severity": "critical",
+    "category": "Backend",
+    "location": "bookings.service.ts:450-525",
+    "impact": "Two concurrent bookings for the same slot both succeed",
+    "recommendation": "Add a partial unique index or re-check inside the transaction",
+    "effort": "2 hours",
+    "tags": ["race-condition", "database"]
+  },
+  {
+    "id": "C2",
+    "title": "Unauthenticated admin endpoint",
+    "severity": "critical",
+    "category": "Security",
+    "location": "apps/backend/src/admin/admin.controller.ts:34",
+    "impact": "Anyone can access /admin/users without authentication",
+    "recommendation": "Add @UseGuards(AdminGuard) to the controller",
+    "effort": "15 min",
+    "tags": ["auth", "security"]
+  },
+  {
+    "id": "H1",
+    "title": "N+1 query on professional list",
+    "severity": "high",
+    "category": "Performance",
+    "location": "apps/backend/src/professionals/professionals.service.ts:88-120",
+    "impact": "List endpoint fires 1 query per professional when loading relations",
+    "recommendation": "Use find({ relations: { reviews: true } }) with a single join",
+    "effort": "1 hour",
+    "tags": ["database", "performance"]
+  },
+  {
+    "id": "H2",
+    "title": "JWT secret hardcoded in docker-compose",
+    "severity": "high",
+    "category": "Security",
+    "location": "docker-compose.yml:18",
+    "impact": "JWT signing secret is visible in the repo, tokens can be forged",
+    "recommendation": "Move to an environment variable, rotate the secret",
+    "effort": "30 min",
+    "tags": ["secrets", "config"]
+  },
+  {
+    "id": "M1",
+    "title": "Missing input validation on phone field",
+    "severity": "medium",
+    "category": "Backend",
+    "location": "apps/backend/src/auth/dto/register.dto.ts:22",
+    "impact": "Malformed phone numbers are accepted and stored",
+    "recommendation": "Add @Matches with a phone regex or use class-validator phone pipe",
+    "effort": "20 min",
+    "tags": ["validation"]
+  },
+  {
+    "id": "M2",
+    "title": "Dashboard bundle is 2.4MB uncompressed",
+    "severity": "medium",
+    "category": "Frontend",
+    "location": "apps/dashboard/",
+    "impact": "First load takes 3+ seconds on mobile networks",
+    "recommendation": "Enable code splitting, lazy-load admin routes, tree-shake lodash",
+    "effort": "3 hours",
+    "tags": ["performance", "frontend"]
+  },
+  {
+    "id": "L1",
+    "title": "Inconsistent error response shape",
+    "severity": "low",
+    "category": "Backend",
+    "location": "apps/backend/src/filters/",
+    "impact": "Some endpoints return { error, message }, others return { statusCode, message }",
+    "recommendation": "Standardize on the NestJS HttpException filter shape everywhere",
+    "effort": "1 hour",
+    "tags": ["consistency", "api"]
+  }
+]

@@ -1,0 +1,56 @@
+<!-- COMPONENT: stats-bar -->
+<!-- SLOT: COMPONENT_MAIN_TOP (before or after summary-cards) -->
+<!-- DESCRIPTION: Horizontal stat cards for custom metrics (e.g. "Files scanned", "Endpoints audited", "Test coverage"). Optional, include when the report has metadata stats beyond severity counts. -->
+
+<!-- HTML -->
+<div class="stats-bar" id="stats-bar"></div>
+
+<!-- CSS -->
+.stats-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 24px; }
+.stat-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 18px 22px; display: flex; flex-direction: column; gap: 4px;
+  box-shadow: var(--shadow); transition: var(--transition); position: relative; overflow: hidden;
+}
+.stat-card::after {
+  content: ""; position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+  background: var(--accent); transform: scaleX(0); transform-origin: right;
+  transition: transform var(--transition-slow);
+}
+.stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); border-color: var(--text-dim); }
+.stat-card:hover::after { transform: scaleX(1); transform-origin: left; }
+.stat-card:active { transform: translateY(0); box-shadow: var(--shadow-active); }
+.stat-card .stat-num { font-size: 26px; font-weight: 700; letter-spacing: -0.8px; color: var(--text); line-height: 1; transition: var(--transition); }
+.stat-card:hover .stat-num { transform: scale(1.05); color: var(--accent); }
+.stat-card .stat-label { font-size: 12px; color: var(--text-muted); }
+.stat-card .stat-icon { width: 20px; height: 20px; color: var(--accent); margin-bottom: 8px; transition: var(--transition); }
+.stat-card:hover .stat-icon { transform: scale(1.15) rotate(-5deg); }
+@media (max-width: 600px) {
+  .stats-bar { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .stat-card { padding: 14px 16px; }
+  .stat-card .stat-num { font-size: 22px; }
+}
+@media (max-width: 360px) {
+  .stats-bar { grid-template-columns: 1fr; }
+}
+
+<!-- JS -->
+// Usage: call renderStatsBar([{ num: "332", label: "Endpoints", icon: "api" }, ...])
+// Icons: "api", "file", "shield", "clock", "check", "alert" (renders inline SVG)
+const STAT_ICONS = {
+  api: '<path d="M4 7h16M4 12h10M4 17h16"/>',
+  file: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>',
+  shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+  clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+  check: '<polyline points="20 6 9 17 4 12"/>',
+  alert: '<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+};
+function renderStatsBar(stats) {
+  document.getElementById("stats-bar").innerHTML = stats.map((s, i) => `
+    <div class="stat-card animate-in" style="animation-delay:${i * 0.05}s">
+      ${s.icon ? `<svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${STAT_ICONS[s.icon] || ""}</svg>` : ""}
+      <span class="stat-num">${escapeHtml(String(s.num))}</span>
+      <span class="stat-label">${escapeHtml(s.label)}</span>
+    </div>
+  `).join("");
+}

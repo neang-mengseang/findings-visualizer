@@ -1,0 +1,31 @@
+<!-- COMPONENT: search-bar -->
+<!-- SLOT: COMPONENT_MAIN_TOP (after summary-cards) -->
+<!-- DESCRIPTION: Search input for filtering findings by text. Include when the report has more than 5 findings. -->
+
+<!-- HTML -->
+<div class="search-bar">
+  <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+  <input type="text" id="search" placeholder="Search findings by title, file, impact..." />
+</div>
+
+<!-- CSS -->
+.search-bar { margin-bottom: 20px; position: relative; }
+.search-bar input {
+  width: 100%; padding: 11px 16px 11px 40px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border); background: var(--surface); color: var(--text);
+  font-size: 16px; font-family: var(--font); outline: none; transition: var(--transition);
+  box-shadow: var(--shadow);
+}
+.search-bar input:hover { border-color: var(--text-dim); }
+.search-bar input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-bg), var(--shadow); }
+.search-bar input::placeholder { color: var(--text-dim); }
+.search-bar .search-icon { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--text-dim); transition: var(--transition); }
+.search-bar input:focus ~ .search-icon { color: var(--accent); transform: translateY(-50%) scale(1.1); }
+
+<!-- JS -->
+function bindSearch() {
+  document.getElementById("search").addEventListener("input", (e) => {
+    searchTerm = e.target.value.trim();
+    renderFindings();
+  });
+}

@@ -1,0 +1,71 @@
+<!-- COMPONENT: category-chart -->
+<!-- SLOT: COMPONENT_MAIN_TOP (after severity-chart, before search-bar) -->
+<!-- DESCRIPTION: Horizontal bar chart showing findings count per category. Include when findings have categories. -->
+
+<!-- HTML -->
+<div class="chart-card category-chart-wrap">
+  <div class="chart-title">Findings by Category</div>
+  <div class="bar-chart" id="bar-chart"></div>
+</div>
+
+<!-- CSS -->
+.bar-chart { display: flex; flex-direction: column; gap: 12px; }
+.bar-row { display: flex; align-items: center; gap: 12px; transition: var(--transition); padding: 4px; border-radius: var(--radius-sm); }
+.bar-row:hover { background: var(--surface-hover); transform: translateX(2px); }
+.bar-label { font-size: 13px; color: var(--text); min-width: 100px; flex-shrink: 0; text-align: right; font-weight: 500; transition: var(--transition); }
+.bar-row:hover .bar-label { color: var(--accent); }
+.bar-track { flex: 1; height: 28px; background: var(--surface-hover); border-radius: var(--radius-sm); overflow: hidden; position: relative; }
+.bar-fill { height: 100%; border-radius: var(--radius-sm); transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1), filter var(--transition); display: flex; align-items: center; padding-left: 10px; }
+.bar-row:hover .bar-fill { filter: brightness(1.1); }
+.bar-fill.critical { background: linear-gradient(90deg, rgba(251,113,133,0.8), rgba(251,113,133,1)); }
+.bar-fill.high { background: linear-gradient(90deg, rgba(251,146,60,0.8), rgba(251,146,60,1)); }
+.bar-fill.medium { background: linear-gradient(90deg, rgba(251,191,36,0.8), rgba(251,191,36,1)); }
+.bar-fill.low { background: linear-gradient(90deg, rgba(52,211,153,0.8), rgba(52,211,153,1)); }
+.bar-count { font-size: 11px; font-weight: 700; color: #fff; white-space: nowrap; }
+@media (max-width: 600px) {
+  .bar-label { min-width: 70px; font-size: 12px; }
+  .bar-track { height: 24px; }
+  .bar-fill { padding-left: 8px; }
+}
+@media (max-width: 400px) {
+  .bar-label { min-width: 60px; font-size: 11px; }
+}
+
+<!-- JS -->
+function renderCategoryChart() {
+  const cats = {};
+  FINDINGS.forEach(f => {
+    if (!f.category) return;
+    if (!cats[f.category]) cats[f.category] = { total: 0, critical: 0, high: 0, medium: 0, low: 0 };
+    cats[f.category].total++;
+    if (cats[f.category][f.severity] !== undefined) cats[f.category][f.severity]++;
+  });
+
+  const entries = Object.entries(cats).sort((a, b) => b[1].total - a[1].total);
+  if (entries.length === 0) return;
+
+  const maxCount = Math.max(...entries.map(e => e[1].total));
+  const domSev = (c) => {
+    if (c.critical > 0) return "critical";
+    if (c.high > 0) return "high";
+    if (c.medium > 0) return "medium";
+    return "low";
+  };
+
+  document.getElementById("bar-chart").innerHTML = entries.map(([cat, c], i) => {
+    const pct = (c.total / maxCount) * 100;
+    const sev = domSev(c);
+    return `<div class="bar-row" style="animation: fadeInUp var(--transition) ease-out ${i * 0.05}s both">
+      <span class="bar-label">${escapeHtml(cat)}</span>
+      <div class="bar-track"><div class="bar-fill ${sev}" style="width:0"><span class="bar-count">${c.total}</span></div></div>
+    </div>`;
+  }).join("");
+
+  // Animate bars in after render
+  requestAnimationFrame(() => {
+    document.querySelectorAll("#bar-chart .bar-fill").forEach((bar, i) => {
+      const pct = (entries[i][1].total / maxCount) * 100;
+      setTimeout(() => { bar.style.width = pct + "%"; }, 50);
+    });
+  });
+}

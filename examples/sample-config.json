@@ -1,0 +1,28 @@
+{
+  "title": "H2H Production Readiness Audit",
+  "subtitle": "Backend, Dashboard, Infra",
+  "date": "September 3, 2026",
+  "findings": "sample-findings.json",
+  "strengths": [
+    "ABAPayWay webhooks are genuinely idempotent",
+    "SessionGuard checks both deletedAt and isSuspended",
+    "Pagination is consistently applied on all list endpoints",
+    "OpenAPI spec is auto-generated and CI-guarded against drift"
+  ],
+  "theme": {
+    "accent": "#818cf8"
+  },
+  "components": {
+    "verdict": {
+      "status": "fail",
+      "title": "NOT READY",
+      "subtitle": "2 critical issues must be fixed before launch"
+    },
+    "stats": [
+      { "num": "332", "label": "Endpoints", "icon": "api" },
+      { "num": "49", "label": "Tables", "icon": "file" },
+      { "num": "7", "label": "Findings", "icon": "alert" },
+      { "num": "4", "label": "Strengths", "icon": "check" }
+    ]
+  }
+}

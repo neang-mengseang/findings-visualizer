@@ -1,0 +1,78 @@
+<!-- COMPONENT: severity-chart -->
+<!-- SLOT: COMPONENT_MAIN_TOP (after summary-cards, before search-bar) -->
+<!-- DESCRIPTION: Donut chart showing severity distribution. Always include this. -->
+
+<!-- HTML -->
+<div class="chart-card severity-chart-wrap">
+  <div class="chart-title">Severity Distribution</div>
+  <div class="donut-wrap">
+    <svg class="donut" viewBox="0 0 120 120" id="severity-donut"></svg>
+    <div class="donut-center">
+      <span class="donut-num" id="donut-total">0</span>
+      <span class="donut-label">Findings</span>
+    </div>
+  </div>
+  <div class="donut-legend" id="donut-legend"></div>
+</div>
+
+<!-- CSS -->
+.chart-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 22px; margin-bottom: 24px; box-shadow: var(--shadow); transition: var(--transition);
+}
+.chart-card:hover { border-color: var(--text-dim); box-shadow: var(--shadow-hover); transform: translateY(-1px); }
+.chart-title { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 20px; }
+.donut-wrap { position: relative; width: 140px; height: 140px; margin: 0 auto 20px; }
+.donut { width: 140px; height: 140px; transform: rotate(-90deg); }
+.donut circle { fill: none; stroke-width: 14; transition: stroke-dasharray 0.8s cubic-bezier(0.4, 0, 0.2, 1), stroke-width var(--transition); }
+.donut circle:hover { stroke-width: 18; cursor: pointer; }
+.donut-center {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  text-align: center;
+}
+.donut-num { font-size: 30px; font-weight: 700; display: block; line-height: 1; letter-spacing: -1px; transition: var(--transition); }
+.donut-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; margin-top: 4px; display: block; }
+.donut-legend { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.donut-legend .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); transition: var(--transition); padding: 4px 8px; border-radius: var(--radius-sm); cursor: default; }
+.donut-legend .legend-item:hover { background: var(--surface-hover); color: var(--text); transform: translateY(-1px); }
+.donut-legend .legend-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; transition: var(--transition); }
+.donut-legend .legend-item:hover .legend-dot { transform: scale(1.3); }
+@media (max-width: 600px) {
+  .chart-card { padding: 16px; }
+  .donut-wrap { width: 110px; height: 110px; }
+  .donut { width: 110px; height: 110px; }
+  .donut-num { font-size: 24px; }
+  .donut-legend { gap: 10px; }
+}
+
+<!-- JS -->
+function renderSeverityChart() {
+  const counts = { critical: 0, high: 0, medium: 0, low: 0 };
+  FINDINGS.forEach(f => { if (counts[f.severity] !== undefined) counts[f.severity]++; });
+  const total = FINDINGS.length;
+  const colors = { critical: "--critical", high: "--high", medium: "--medium", low: "--low" };
+  const labels = { critical: "Critical", high: "High", medium: "Medium", low: "Low" };
+
+  document.getElementById("donut-total").textContent = total;
+
+  const radius = 46;
+  const circ = 2 * Math.PI * radius;
+  let offset = 0;
+  const segments = ["critical", "high", "medium", "low"]
+    .filter(s => counts[s] > 0)
+    .map(s => {
+      const frac = counts[s] / total;
+      const len = frac * circ;
+      const color = `var(${colors[s]})`;
+      const seg = `<circle cx="60" cy="60" r="${radius}" stroke="${color}" stroke-dasharray="${len} ${circ - len}" stroke-dashoffset="${-offset}"/>`;
+      offset += len;
+      return seg;
+    }).join("");
+
+  document.getElementById("severity-donut").innerHTML = segments;
+
+  document.getElementById("donut-legend").innerHTML = ["critical", "high", "medium", "low"]
+    .filter(s => counts[s] > 0)
+    .map(s => `<div class="legend-item"><span class="legend-dot" style="background:var(${colors[s]})"></span>${labels[s]} (${counts[s]})</div>`)
+    .join("");
+}

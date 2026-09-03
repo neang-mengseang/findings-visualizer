@@ -1,0 +1,14 @@
+{
+  "name": "mengseang",
+  "owner": { "name": "mengseang", "url": "https://mengseang.netlify.app" },
+  "plugins": [
+    {
+      "name": "audit-report-viewer",
+      "source": "github:mengseang/audit-report-viewer",
+      "description": "Generate a self-contained interactive HTML dashboard from any structured findings report.",
+      "version": "1.0.0",
+      "categories": ["developer-tools", "code-quality", "security"],
+      "keywords": ["audit", "report", "dashboard", "security", "findings", "html"]
+    }
+  ]
+}

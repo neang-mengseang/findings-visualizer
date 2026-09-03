@@ -1,0 +1,75 @@
+<!-- COMPONENT: heatmap-chart -->
+<!-- SLOT: COMPONENT_MAIN_TOP (inside bento grid, full width) -->
+<!-- DESCRIPTION: Grid heatmap showing finding counts at the intersection of severity and category. Include when findings have categories. -->
+
+<!-- HTML -->
+<div class="chart-card heatmap-chart-wrap" id="heatmap-chart-card">
+  <div class="chart-title">Severity x Category Heatmap</div>
+  <div class="heatmap-scroll"><table class="heatmap" id="heatmap"></table></div>
+</div>
+
+<!-- CSS -->
+.heatmap-scroll { overflow-x: auto; }
+.heatmap { border-collapse: separate; border-spacing: 3px; width: 100%; }
+.heatmap th { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; padding: 6px 10px; text-align: center; white-space: nowrap; }
+.heatmap th.row-label { text-align: right; min-width: 100px; }
+.heatmap td { text-align: center; }
+.heatmap .heat-cell {
+  border-radius: 6px; padding: 10px 14px; font-size: 13px; font-weight: 600;
+  min-width: 50px; transition: var(--transition); cursor: default;
+}
+.heatmap .heat-cell:hover { transform: scale(1.08); }
+.heatmap .heat-cell.empty { background: var(--surface-hover); color: var(--text-dim); }
+.heatmap .cat-total { font-size: 12px; font-weight: 700; color: var(--text); padding: 6px 10px; }
+
+<!-- JS -->
+function renderHeatmap() {
+  const cats = [...new Set(FINDINGS.map(f => f.category).filter(Boolean))].sort();
+  if (cats.length === 0) {
+    document.getElementById("heatmap-chart-card").style.display = "none";
+    return;
+  }
+  const sevs = ["critical", "high", "medium", "low"];
+  const sevColors = { critical: "#fb7185", high: "#fb923c", medium: "#fbbf24", low: "#34d399" };
+  const sevLabels = { critical: "Crit", high: "High", medium: "Med", low: "Low" };
+
+  const grid = {};
+  cats.forEach(c => { grid[c] = {}; sevs.forEach(s => grid[c][s] = 0); });
+  FINDINGS.forEach(f => {
+    if (f.category && grid[f.category] && grid[f.category][f.severity] !== undefined) {
+      grid[f.category][f.severity]++;
+    }
+  });
+
+  const maxCount = Math.max(...cats.flatMap(c => sevs.map(s => grid[c][s])), 1);
+
+  function heatBg(sev, count) {
+    if (count === 0) return "var(--surface-hover)";
+    const alpha = 0.15 + (count / maxCount) * 0.65;
+    const color = sevColors[sev];
+    const hex = color.replace("#", "");
+    const r = parseInt(hex.substr(0,2), 16);
+    const g = parseInt(hex.substr(2,2), 16);
+    const b = parseInt(hex.substr(4,2), 16);
+    return `rgba(${r},${g},${b},${alpha})`;
+  }
+
+  let html = "<thead><tr><th class='row-label'>Category</th>";
+  sevs.forEach(s => html += `<th>${sevLabels[s]}</th>`);
+  html += "<th>Total</th></tr></thead><tbody>";
+
+  cats.forEach(c => {
+    const total = sevs.reduce((sum, s) => sum + grid[c][s], 0);
+    html += `<tr><th class='row-label'>${escapeHtml(c)}</th>`;
+    sevs.forEach(s => {
+      const count = grid[c][s];
+      const bg = heatBg(s, count);
+      const color = count > 0 ? (count / maxCount > 0.5 ? "#fff" : "var(--text)") : "var(--text-dim)";
+      html += `<td><div class="heat-cell ${count === 0 ? "empty" : ""}" style="background:${bg};color:${color}">${count > 0 ? count : ""}</div></td>`;
+    });
+    html += `<td><div class="cat-total">${total}</div></td></tr>`;
+  });
+
+  html += "</tbody>";
+  document.getElementById("heatmap").innerHTML = html;
+}

@@ -1,0 +1,28 @@
+{
+  "name": "audit-report-viewer",
+  "version": "1.0.0",
+  "description": "Generate a self-contained interactive HTML dashboard from any structured findings report (security audit, code review, production readiness, performance audit).",
+  "author": {
+    "name": "mengseang",
+    "url": "https://mengseang.netlify.app"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/mengseang/audit-report-viewer",
+  "keywords": [
+    "audit",
+    "report",
+    "dashboard",
+    "security",
+    "code-review",
+    "findings",
+    "html",
+    "visualization",
+    "production-readiness"
+  ],
+  "categories": [
+    "developer-tools",
+    "code-quality",
+    "security"
+  ],
+  "install": "npx skills add mengseang/audit-report-viewer"
+}

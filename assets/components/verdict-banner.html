@@ -1,0 +1,59 @@
+<!-- COMPONENT: verdict-banner -->
+<!-- SLOT: COMPONENT_MAIN_TOP (before summary-cards) -->
+<!-- DESCRIPTION: A prominent banner showing the overall verdict (e.g. "NOT READY", "READY", "PASS WITH WARNINGS"). Optional, include when the report has a clear pass/fail verdict. -->
+
+<!-- HTML -->
+<div class="verdict-banner" id="verdict-banner"></div>
+
+<!-- CSS -->
+.verdict-banner {
+  border-radius: var(--radius); padding: 22px 26px; margin-bottom: 24px;
+  display: flex; align-items: center; gap: 16px; border: 1px solid;
+  box-shadow: var(--shadow); transition: var(--transition); position: relative; overflow: hidden;
+}
+.verdict-banner::before {
+  content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+  transition: var(--transition-slow);
+}
+.verdict-banner:hover { transform: translateY(-1px); box-shadow: var(--shadow-hover); }
+.verdict-banner:hover::before { width: 6px; }
+.verdict-banner.fail { background: var(--critical-bg); border-color: var(--critical); }
+.verdict-banner.fail::before { background: var(--critical); }
+.verdict-banner.warn { background: var(--high-bg); border-color: var(--high); }
+.verdict-banner.warn::before { background: var(--high); }
+.verdict-banner.pass { background: var(--low-bg); border-color: var(--low); }
+.verdict-banner.pass::before { background: var(--low); }
+.verdict-banner .verdict-icon { width: 28px; height: 28px; flex-shrink: 0; transition: var(--transition); }
+.verdict-banner:hover .verdict-icon { transform: scale(1.1); }
+.verdict-banner.fail .verdict-icon { color: var(--critical); }
+.verdict-banner.warn .verdict-icon { color: var(--high); }
+.verdict-banner.pass .verdict-icon { color: var(--low); }
+.verdict-banner .verdict-text { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; }
+.verdict-banner.fail .verdict-text { color: var(--critical); }
+.verdict-banner.warn .verdict-text { color: var(--high); }
+.verdict-banner.pass .verdict-text { color: var(--low); }
+.verdict-banner .verdict-sub { font-size: 13px; color: var(--text-muted); margin-top: 3px; }
+@media (max-width: 600px) {
+  .verdict-banner { padding: 16px 18px; gap: 12px; }
+  .verdict-banner .verdict-text { font-size: 14px; }
+  .verdict-banner .verdict-sub { font-size: 12px; }
+  .verdict-banner .verdict-icon { width: 24px; height: 24px; }
+}
+
+<!-- JS -->
+// Usage: call renderVerdict("fail" | "warn" | "pass", "NOT READY", "12 critical issues must be fixed")
+function renderVerdict(status, title, subtitle) {
+  const icons = {
+    fail: '<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>',
+    warn: '<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+    pass: '<polyline points="20 6 9 17 4 12"/>',
+  };
+  document.getElementById("verdict-banner").innerHTML = `
+    <svg class="verdict-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${icons[status] || ""}</svg>
+    <div>
+      <div class="verdict-text">${escapeHtml(title)}</div>
+      <div class="verdict-sub">${escapeHtml(subtitle)}</div>
+    </div>
+  `;
+  document.getElementById("verdict-banner").className = "verdict-banner " + status + " animate-in";
+}

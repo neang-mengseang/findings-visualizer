@@ -1,0 +1,62 @@
+<!-- COMPONENT: summary-cards -->
+<!-- SLOT: COMPONENT_MAIN_TOP -->
+<!-- DESCRIPTION: Severity count cards shown at the top of the report. Always include this. -->
+
+<!-- HTML -->
+<div class="summary" id="summary"></div>
+
+<!-- CSS -->
+.summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 28px; }
+.summary-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 20px 22px; display: flex; flex-direction: column; gap: 6px;
+  box-shadow: var(--shadow); transition: var(--transition); position: relative; overflow: hidden;
+  cursor: default;
+}
+.summary-card::before {
+  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: var(--card-color, var(--text-dim)); transform: scaleX(0); transform-origin: left;
+  transition: transform var(--transition-slow);
+}
+.summary-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); border-color: var(--text-dim); }
+.summary-card:hover::before { transform: scaleX(1); }
+.summary-card:active { transform: translateY(0); box-shadow: var(--shadow-active); }
+.summary-card .num { font-size: 32px; font-weight: 700; letter-spacing: -1.5px; line-height: 1; transition: var(--transition); }
+.summary-card:hover .num { transform: scale(1.05); }
+.summary-card .label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; font-weight: 500; }
+.summary-card.critical { --card-color: var(--critical); }
+.summary-card.critical .num { color: var(--critical); }
+.summary-card.high { --card-color: var(--high); }
+.summary-card.high .num { color: var(--high); }
+.summary-card.medium { --card-color: var(--medium); }
+.summary-card.medium .num { color: var(--medium); }
+.summary-card.low { --card-color: var(--low); }
+.summary-card.low .num { color: var(--low); }
+.summary-card.total { --card-color: var(--accent); }
+.summary-card.total .num { color: var(--text); }
+@media (max-width: 600px) {
+  .summary { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .summary-card { padding: 14px 16px; }
+  .summary-card .num { font-size: 24px; }
+  .summary-card .label { font-size: 10px; }
+}
+@media (max-width: 360px) {
+  .summary { grid-template-columns: 1fr; }
+}
+
+<!-- JS -->
+function renderSummary() {
+  const counts = { critical: 0, high: 0, medium: 0, low: 0 };
+  FINDINGS.forEach(f => { if (counts[f.severity] !== undefined) counts[f.severity]++; });
+  const total = FINDINGS.length;
+  const cards = [
+    { cls: "total", num: total, label: "Total" },
+    { cls: "critical", num: counts.critical, label: "Critical" },
+    { cls: "high", num: counts.high, label: "High" },
+    { cls: "medium", num: counts.medium, label: "Medium" },
+    { cls: "low", num: counts.low, label: "Low" },
+  ];
+  document.getElementById("summary").innerHTML = cards.map((c, i) =>
+    `<div class="summary-card ${c.cls} animate-in" style="animation-delay:${i * 0.04}s"><span class="num">${c.num}</span><span class="label">${c.label}</span></div>`
+  ).join("");
+}

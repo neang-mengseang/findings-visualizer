@@ -1,0 +1,72 @@
+<!-- COMPONENT: effort-chart -->
+<!-- SLOT: COMPONENT_MAIN_TOP (inside bento grid) -->
+<!-- DESCRIPTION: Horizontal bars showing total estimated fix effort per severity. Include when findings have effort fields. -->
+
+<!-- HTML -->
+<div class="chart-card effort-chart-wrap" id="effort-chart-card">
+  <div class="chart-title">Fix Effort by Severity</div>
+  <div class="effort-list" id="effort-list"></div>
+</div>
+
+<!-- CSS -->
+.effort-list { display: flex; flex-direction: column; gap: 12px; }
+.effort-row { display: flex; flex-direction: column; gap: 4px; }
+.effort-row-top { display: flex; justify-content: space-between; align-items: center; }
+.effort-row-label { font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+.effort-row-label .sev-dot { width: 8px; height: 8px; border-radius: 50%; }
+.effort-row-value { font-size: 13px; font-weight: 600; }
+.effort-track { height: 8px; background: var(--surface-hover); border-radius: 4px; overflow: hidden; }
+.effort-fill { height: 100%; border-radius: 4px; transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+.effort-fill.critical { background: var(--critical); }
+.effort-fill.high { background: var(--high); }
+.effort-fill.medium { background: var(--medium); }
+.effort-fill.low { background: var(--low); }
+.effort-empty { font-size: 12px; color: var(--text-dim); text-align: center; padding: 20px 0; }
+
+<!-- JS -->
+function parseEffort(effort) {
+  if (!effort) return 0;
+  const str = String(effort).toLowerCase();
+  let hours = 0;
+  const dayMatch = str.match(/([\d.]+)\s*day/);
+  const hourMatch = str.match(/([\d.]+)\s*hr|hour/);
+  const minMatch = str.match(/([\d.]+)\s*min/);
+  if (dayMatch) hours += parseFloat(dayMatch[1]) * 8;
+  if (hourMatch) hours += parseFloat(hourMatch[1]);
+  if (minMatch) hours += parseFloat(minMatch[1]) / 60;
+  if (str.includes("half day")) hours += 4;
+  return hours;
+}
+function formatHours(h) {
+  if (h === 0) return "0h";
+  if (h >= 8) return `${(h / 8).toFixed(1)}d`;
+  if (h < 1) return `${Math.round(h * 60)}m`;
+  return `${h.toFixed(1)}h`;
+}
+function renderEffortChart() {
+  const hasEffort = FINDINGS.some(f => f.effort);
+  if (!hasEffort) {
+    document.getElementById("effort-chart-card").style.display = "none";
+    return;
+  }
+  const efforts = { critical: 0, high: 0, medium: 0, low: 0 };
+  FINDINGS.forEach(f => {
+    if (efforts[f.severity] !== undefined) efforts[f.severity] += parseEffort(f.effort);
+  });
+  const maxEffort = Math.max(...Object.values(efforts), 1);
+  const colors = { critical: "#fb7185", high: "#fb923c", medium: "#fbbf24", low: "#34d399" };
+  const labels = { critical: "Critical", high: "High", medium: "Medium", low: "Low" };
+
+  document.getElementById("effort-list").innerHTML = ["critical", "high", "medium", "low"]
+    .filter(s => efforts[s] > 0)
+    .map(s => {
+      const pct = (efforts[s] / maxEffort) * 100;
+      return `<div class="effort-row">
+        <div class="effort-row-top">
+          <span class="effort-row-label"><span class="sev-dot" style="background:${colors[s]}"></span>${labels[s]}</span>
+          <span class="effort-row-value">${formatHours(efforts[s])}</span>
+        </div>
+        <div class="effort-track"><div class="effort-fill ${s}" style="width:${pct}%"></div></div>
+      </div>`;
+    }).join("") || `<div class="effort-empty">No effort data</div>`;
+}

@@ -1,0 +1,85 @@
+<!-- COMPONENT: finding-controls -->
+<!-- SLOT: COMPONENT_MAIN_BODY (before findings-list, after search-bar) -->
+<!-- DESCRIPTION: Sort dropdown, expand/collapse all buttons, result count. Include when findings-list is included. -->
+
+<!-- HTML -->
+<div class="finding-controls">
+  <div class="result-count" id="result-count"></div>
+  <div class="control-buttons">
+    <div class="sort-wrap">
+      <span class="sort-label">Sort</span>
+      <select id="sort-select" onchange="changeSort(this.value)">
+        <option value="severity">Severity</option>
+        <option value="category">Category</option>
+        <option value="effort">Effort (high to low)</option>
+        <option value="id">ID</option>
+      </select>
+    </div>
+    <button class="ctrl-btn" onclick="toggleAllExpanded()" id="expand-all-btn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m7 13 5 5 5-5M7 6l5 5 5-5"/></svg>
+      <span>Expand all</span>
+    </button>
+  </div>
+</div>
+
+<!-- CSS -->
+.finding-controls {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  margin-bottom: 12px; flex-wrap: wrap;
+}
+.result-count { font-size: 13px; color: var(--text-muted); }
+.result-count strong { color: var(--text); font-weight: 600; }
+.control-buttons { display: flex; align-items: center; gap: 8px; }
+.sort-wrap { display: flex; align-items: center; gap: 6px; }
+.sort-label { font-size: 12px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; }
+.sort-wrap select {
+  padding: 6px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border);
+  background: var(--surface); color: var(--text); font-size: 13px; font-family: var(--font);
+  cursor: pointer; outline: none; transition: var(--transition);
+}
+.sort-wrap select:hover { border-color: var(--text-dim); }
+.sort-wrap select:focus { border-color: var(--accent); }
+.ctrl-btn {
+  display: flex; align-items: center; gap: 5px; padding: 6px 12px;
+  border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface);
+  color: var(--text-muted); cursor: pointer; font-size: 13px; font-family: var(--font);
+  transition: var(--transition);
+}
+.ctrl-btn:hover { background: var(--surface-hover); color: var(--text); border-color: var(--text-dim); }
+.ctrl-btn svg { flex-shrink: 0; }
+
+<!-- JS -->
+function changeSort(value) {
+  sortBy = value;
+  renderFindings();
+}
+function toggleAllExpanded() {
+  allExpanded = !allExpanded;
+  document.querySelectorAll(".finding").forEach(f => {
+    f.classList.toggle("expanded", allExpanded);
+  });
+  const btn = document.getElementById("expand-all-btn");
+  btn.querySelector("span").textContent = allExpanded ? "Collapse all" : "Expand all";
+  btn.querySelector("svg").innerHTML = allExpanded
+    ? '<path d="m7 11 5-5 5 5M7 18l5-5 5 5"/>'
+    : '<path d="m7 13 5 5 5-5M7 6l5 5 5-5"/>';
+}
+function updateResultCount() {
+  const filtered = getFiltered();
+  const el = document.getElementById("result-count");
+  if (el) el.innerHTML = `Showing <strong>${filtered.length}</strong> of <strong>${FINDINGS.length}</strong> findings`;
+}
+function bindKeyboard() {
+  document.addEventListener("keydown", (e) => {
+    if (e.target.tagName === "INPUT" || e.target.tagName === "SELECT" || e.target.tagName == "TEXTAREA") return;
+    if (e.key === "/") {
+      e.preventDefault();
+      const search = document.getElementById("search");
+      if (search) search.focus();
+    } else if (e.key === "e" || e.key === "E") {
+      toggleAllExpanded();
+    } else if (e.key === "c" || e.key === "C") {
+      if (allExpanded) toggleAllExpanded();
+    }
+  });
+}

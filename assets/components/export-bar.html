@@ -1,0 +1,44 @@
+<!-- COMPONENT: export-bar -->
+<!-- SLOT: COMPONENT_MAIN_TOP (after header, before verdict-banner) -->
+<!-- DESCRIPTION: Export buttons (download JSON, print/PDF). Always include this. -->
+
+<!-- HTML -->
+<div class="export-bar">
+  <button class="export-btn" onclick="exportJSON()" title="Download findings as JSON">
+    <svg class="export-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    <span>JSON</span>
+  </button>
+  <button class="export-btn" onclick="window.print()" title="Print or save as PDF">
+    <svg class="export-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+    <span>Print / PDF</span>
+  </button>
+</div>
+
+<!-- CSS -->
+.export-bar { display: flex; gap: 8px; margin-bottom: 24px; }
+.export-btn {
+  display: flex; align-items: center; gap: 7px; padding: 10px 15px;
+  border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface);
+  color: var(--text-muted); cursor: pointer; font-size: 13px; font-family: var(--font);
+  transition: var(--transition); font-weight: 500; min-height: 40px; touch-action: manipulation;
+  box-shadow: var(--shadow);
+}
+.export-btn:hover { background: var(--surface-hover); color: var(--text); border-color: var(--text-dim); transform: translateY(-1px); box-shadow: var(--shadow-hover); }
+.export-btn:active { transform: translateY(0) scale(0.97); box-shadow: var(--shadow-active); }
+.export-btn .export-icon { flex-shrink: 0; transition: var(--transition); }
+.export-btn:hover .export-icon { transform: translateY(-2px); color: var(--accent); }
+.export-btn:active .export-icon { transform: translateY(0); }
+
+<!-- JS -->
+function exportJSON() {
+  const data = { findings: FINDINGS, strengths: STRENGTHS || [] };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "audit-findings.json";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}

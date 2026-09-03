@@ -1,0 +1,130 @@
+<!-- COMPONENT: findings-list -->
+<!-- SLOT: COMPONENT_MAIN_BODY -->
+<!-- DESCRIPTION: The list of finding cards with expand/collapse. Always include this, it is the core of the report. -->
+
+<!-- HTML -->
+<div class="findings" id="findings"></div>
+
+<!-- CSS -->
+.findings { display: flex; flex-direction: column; gap: 10px; }
+.finding {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  overflow: hidden; transition: var(--transition); box-shadow: var(--shadow);
+}
+.finding:hover { border-color: var(--text-dim); box-shadow: var(--shadow-hover); transform: translateY(-1px); }
+.finding.expanded { border-color: var(--text-dim); box-shadow: var(--shadow-lg); transform: translateY(-1px); }
+.finding-header {
+  display: flex; align-items: flex-start; gap: 14px; padding: 16px 20px; cursor: pointer;
+  user-select: none; transition: background var(--transition-fast);
+}
+.finding-header:hover { background: var(--surface-hover); }
+.finding-header:active { background: var(--border-subtle); }
+.finding-id { font-family: var(--mono); font-size: 12px; color: var(--text-dim); flex-shrink: 0; padding-top: 2px; min-width: 44px; font-weight: 500; transition: color var(--transition); }
+.finding:hover .finding-id { color: var(--text-muted); }
+.finding-title { flex: 1; font-size: 14px; font-weight: 500; line-height: 1.5; transition: color var(--transition); }
+.finding:hover .finding-title { color: var(--text); }
+.finding-title .loc { display: block; font-family: var(--mono); font-size: 12px; color: var(--text-muted); margin-top: 4px; font-weight: 400; }
+.sev-badge {
+  flex-shrink: 0; padding: 4px 11px; border-radius: 20px; font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.6px; transition: var(--transition);
+}
+.finding:hover .sev-badge { transform: scale(1.05); }
+.sev-badge.critical { background: var(--critical-bg); color: var(--critical-text); }
+.sev-badge.high { background: var(--high-bg); color: var(--high-text); }
+.sev-badge.medium { background: var(--medium-bg); color: var(--medium-text); }
+.sev-badge.low { background: var(--low-bg); color: var(--low-text); }
+.chevron { flex-shrink: 0; color: var(--text-dim); transition: transform var(--transition-slow), color var(--transition); margin-top: 2px; }
+.finding:hover .chevron { color: var(--text-muted); }
+.finding.expanded .chevron { transform: rotate(90deg); color: var(--accent); }
+.finding-body {
+  display: none; padding: 0 20px 20px 78px; border-top: 1px solid var(--border-subtle);
+}
+.finding.expanded .finding-body { display: block; animation: fadeIn var(--transition-slow) ease-out; }
+.finding-body .section { margin-top: 16px; animation: fadeInUp var(--transition) ease-out both; }
+.finding-body .section:nth-child(1) { animation-delay: 0.02s; }
+.finding-body .section:nth-child(2) { animation-delay: 0.06s; }
+.finding-body .section:nth-child(3) { animation-delay: 0.10s; }
+.finding-body .section:nth-child(4) { animation-delay: 0.14s; }
+.finding-body .section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-dim); margin-bottom: 6px; }
+.finding-body .section-text { font-size: 13px; color: var(--text); line-height: 1.6; }
+.finding-body .copy-loc {
+  font-family: var(--mono); font-size: 12px; color: var(--accent); cursor: pointer;
+  padding: 7px 12px; border-radius: var(--radius-sm); background: var(--accent-bg); display: inline-block;
+  transition: var(--transition); border: 1px solid var(--border);
+}
+.finding-body .copy-loc:hover { background: var(--accent); color: #fff; border-color: var(--accent); transform: translateY(-1px); }
+.finding-body .copy-loc:active { transform: translateY(0); }
+.finding-body .copy-loc.copied { color: var(--low); background: var(--low-bg); border-color: var(--low); }
+.finding-body .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.finding-body .tag { font-size: 11px; padding: 3px 9px; border-radius: 20px; background: var(--surface-hover); color: var(--text-muted); border: 1px solid var(--border); transition: var(--transition); cursor: default; }
+.finding-body .tag:hover { color: var(--text); border-color: var(--text-dim); background: var(--border); transform: translateY(-1px); }
+.finding-body .effort { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text-muted); margin-top: 10px; padding: 4px 10px; background: var(--surface-hover); border-radius: 20px; transition: var(--transition); }
+.finding-body .effort:hover { color: var(--text); border-color: var(--text-dim); }
+.empty-state { text-align: center; padding: 80px 20px; color: var(--text-dim); animation: fadeIn var(--transition-slow); }
+.empty-state p { font-size: 15px; }
+@media (max-width: 600px) {
+  .finding-header { padding: 14px 16px; gap: 10px; }
+  .finding-id { min-width: 36px; font-size: 11px; }
+  .finding-title { font-size: 13px; }
+  .finding-title .loc { font-size: 11px; }
+  .sev-badge { padding: 3px 8px; font-size: 9px; }
+  .finding-body { padding: 0 16px 16px 16px; }
+  .finding-body .section-text { font-size: 12px; }
+  .empty-state { padding: 50px 16px; }
+}
+@media (max-width: 400px) {
+  .finding-id { display: none; }
+  .finding-body { padding-left: 16px; }
+}
+
+<!-- JS -->
+function getFiltered() {
+  return FINDINGS
+    .filter(f => activeSeverity === "all" || f.severity === activeSeverity)
+    .filter(f => !activeCategory || f.category === activeCategory)
+    .filter(f => {
+      if (!searchTerm) return true;
+      const q = searchTerm.toLowerCase();
+      return [f.title, f.location, f.impact, f.recommendation, f.id, f.category]
+        .filter(Boolean).some(v => v.toLowerCase().includes(q));
+    })
+    .sort((a, b) => (sevOrder[a.severity] ?? 9) - (sevOrder[b.severity] ?? 9));
+}
+function renderFindings() {
+  const filtered = getFiltered();
+  const container = document.getElementById("findings");
+  if (filtered.length === 0) {
+    container.innerHTML = `<div class="empty-state"><p>No findings match your filters.</p></div>`;
+    return;
+  }
+  container.innerHTML = filtered.map((f, i) => `
+    <div class="finding animate-in" data-id="${escapeAttr(f.id)}" style="animation-delay:${Math.min(i * 0.03, 0.3)}s">
+      <div class="finding-header" onclick="toggleFinding(this)">
+        <span class="finding-id">${escapeHtml(f.id)}</span>
+        <div class="finding-title">
+          ${escapeHtml(f.title)}
+          ${f.location ? `<span class="loc">${escapeHtml(f.location)}</span>` : ""}
+        </div>
+        <span class="sev-badge ${f.severity}">${f.severity}</span>
+        <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+      </div>
+      <div class="finding-body">
+        ${f.location ? `<div class="section"><div class="section-label">Location</div><span class="copy-loc" onclick="copyText(this, '${escapeAttr(f.location)}')">${escapeHtml(f.location)}</span></div>` : ""}
+        ${f.impact ? `<div class="section"><div class="section-label">Impact</div><div class="section-text">${escapeHtml(f.impact)}</div></div>` : ""}
+        ${f.recommendation ? `<div class="section"><div class="section-label">Recommendation</div><div class="section-text">${escapeHtml(f.recommendation)}</div></div>` : ""}
+        ${f.effort ? `<div class="effort"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ${escapeHtml(f.effort)}</div>` : ""}
+        ${f.tags && f.tags.length ? `<div class="tags">${f.tags.map(t => `<span class="tag">${escapeHtml(t)}</span>`).join("")}</div>` : ""}
+      </div>
+    </div>
+  `).join("");
+}
+function toggleFinding(header) {
+  header.parentElement.classList.toggle("expanded");
+}
+function copyText(el, text) {
+  navigator.clipboard.writeText(text).then(() => {
+    el.classList.add("copied");
+    el.textContent = "Copied!";
+    setTimeout(() => { el.classList.remove("copied"); el.textContent = text; }, 1500);
+  });
+}
