@@ -1,5 +1,7 @@
 # Findings Visualizer
 
+<p align="center"><img src="assets/logo/logo.png" width="200" alt="Findings Visualizer"></p>
+
 A Devin / Claude Code skill that turns any structured report into a self-contained, interactive HTML dashboard. Four report types supported: security audits, feature status trackers, release checklists, and tool comparisons.
 
 ## Screenshots
