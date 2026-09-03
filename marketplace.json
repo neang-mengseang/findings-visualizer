@@ -5,10 +5,11 @@
     {
       "name": "findings-visualizer",
       "source": "github:neang-mengseang/findings-visualizer",
-      "description": "Generate a self-contained interactive HTML dashboard from any structured findings report.",
-      "version": "1.0.0",
+      "description": "Generate self-contained interactive HTML dashboards from any structured data: security audits, feature status trackers, release checklists, and tool comparisons.",
+      "version": "1.1.0",
+      "icon": "assets/logo/logo.png",
       "categories": ["developer-tools", "code-quality", "security"],
-      "keywords": ["findings", "report", "dashboard", "visualizer", "security", "audit", "html"]
+      "keywords": ["findings", "report", "dashboard", "visualizer", "security", "audit", "checklist", "comparison", "status", "html"]
     }
   ]
 }

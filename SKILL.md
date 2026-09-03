@@ -1,5 +1,6 @@
 ---
 name: findings-visualizer
+icon: assets/logo/logo.png
 description: >-
   Generate a self-contained interactive visual dashboard from any structured
   report (security audit, code review, production readiness, feature status

@@ -63,6 +63,7 @@ $files = @(
   "plugin.json",
   "marketplace.json",
   "assets\shell.html",
+  "assets\logo\logo.png",
   "assets\components\verdict-banner.html",
   "assets\components\summary-cards.html",
   "assets\components\stats-bar.html",
@@ -76,7 +77,13 @@ $files = @(
   "assets\components\findings-list.html",
   "assets\components\strengths-list.html",
   "assets\components\theme-toggle.html",
-  "assets\components\export-bar.html"
+  "assets\components\export-bar.html",
+  "assets\components\status-cards.html",
+  "assets\components\progress-bar.html",
+  "assets\components\feature-list.html",
+  "assets\components\checklist-progress.html",
+  "assets\components\checklist-list.html",
+  "assets\components\comparison-table.html"
 )
 
 $copied = 0
