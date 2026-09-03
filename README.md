@@ -1,30 +1,49 @@
 # Findings Visualizer
 
-A Devin / Claude Code skill that turns any structured findings report into a self-contained, interactive HTML dashboard.
+A Devin / Claude Code skill that turns any structured report into a self-contained, interactive HTML dashboard. Four report types supported: security audits, feature status trackers, release checklists, and tool comparisons.
+
+## Screenshots
+
+### Security Audit Report
+![Security Audit](examples/showcase-audit.png)
+
+### Feature Status Tracker
+![Feature Status](examples/showcase-status.png)
+
+### Release Checklist
+![Release Checklist](examples/showcase-checklist.png)
+
+### Tool Comparison
+![Tool Comparison](examples/showcase-comparison.png)
 
 ## What it does
 
-Instead of sharing audit findings as a wall of markdown text, this skill generates a single `.html` file you can open in any browser, share with stakeholders, or attach to a PR. No server, no dependencies, no build step.
+Instead of sharing findings as a wall of markdown text, this skill generates a single `.html` file you can open in any browser, share with stakeholders, or attach to a PR. No server, no dependencies, no build step.
+
+**4 report types:**
+- **Audit** - findings with severity levels (critical/high/medium/low). Security audits, code reviews, production readiness checks.
+- **Status** - items with status (done/in-progress/todo/blocked). Feature trackers, sprint boards, project status.
+- **Checklist** - items with a checked boolean. Release checklists, QA gates, deployment readiness.
+- **Comparison** - options scored across criteria with pros/cons. Tool selection, architecture decisions, vendor comparison.
 
 **Features:**
-- Two-tab UI: Overview (charts + stats) and Findings (searchable, filterable list)
-- Light/dark theme toggle with per-mode color customization
+- Adaptive sidebar with live filters (severity, status, category, assignee, owner)
+- Mini progress ring and quick stats in the sidebar
+- Light/dark theme toggle with circular reveal animation (always visible in header)
 - 4 chart types: severity donut, category bars, effort breakdown, severity x category heatmap
+- Status cards with clickable filtering
+- Progress bar with live updates
+- Circular checklist progress
+- Comparison table with score dots, summary cards, and pros/cons
+- Expandable feature rows with smooth animations and expand/collapse all controls
 - Print/PDF export (Ctrl+P optimized stylesheet)
-- JSON export (download raw findings back from the page)
-- Summary cards with severity counts
-- Sort dropdown (by severity, category, effort, or ID)
-- Bulk expand/collapse all findings
-- Keyboard shortcuts (/ to search, e to expand all, c to collapse)
-- Filterable, searchable findings table
-- Expandable rows with full details (file, line, impact, fix recommendation)
-- Copy-to-clipboard for file paths
-- Color-coded severity badges (CRITICAL / HIGH / MEDIUM / LOW)
-- Collapsible strengths section
-- Custom stat cards for report metrics
+- JSON export (download raw data back from the page)
+- Custom scrollbars matching the theme
+- Sort, search, bulk expand/collapse, keyboard shortcuts
 - 6 color presets (security, performance, architecture, code-quality, infra, default)
 - 4 layout presets (default, compact, charts-first, list-first)
 - Branding: author, company, logo, footer
+- Optional sidebar (hide with `"sidebar": false`)
 - Custom CSS escape hatch for full control
 - Works offline, single file, zero external dependencies
 
@@ -42,7 +61,7 @@ That's it. The skill lands in your local skills directory and is ready to use. N
 
 Pin to a specific version:
 ```bash
-npx skills add neang-neang-mengseang/findings-visualizer@1.0.0
+npx skills add neang-neang-mengseang/findings-visualizer@1.1.0
 ```
 
 ### Option 2: Install script (for manual / offline installs)
@@ -100,7 +119,7 @@ findings-visualizer/
 └── assets/
     ├── shell.html
     └── components/
-        └── *.html (14 component files)
+        └── *.html (20 component files)
 ```
 
 Restart your agent session to pick up the new skill.
@@ -112,12 +131,16 @@ Just ask your AI agent:
 > "Turn the audit findings into a visual report"
 > "Generate an HTML dashboard from these findings"
 > "Make this report look good"
+> "Create a comparison table for these tools"
+> "Track feature status visually"
+> "Make a release checklist"
 
 The AI will:
-1. Collect findings from the conversation or a file
-2. Write a small config JSON + findings JSON
+1. Identify the report type from your data (audit, status, checklist, or comparison)
+2. Write a small config JSON + data JSON
 3. Run `node scripts/build.js config.json -o report.html --open`
 4. The build script assembles everything into one self-contained `.html` file
+5. Edit the generated HTML directly for any custom tweaks
 
 ## Config JSON
 
@@ -130,6 +153,8 @@ The AI will:
   "findings": "findings.json"
 }
 ```
+
+For status/checklist, use `items` instead of `findings`. For comparison, use `comparison`.
 
 ### With presets + branding
 
@@ -161,6 +186,7 @@ The AI will:
     "light": { "--accent": "#7c3aed", "--bg": "#faf9f7" }
   },
   "layout": "charts-first",
+  "sidebar": false,
   "brand": { "author": "John Smith", "company": "TechCorp", "footer": "Internal use only" },
   "customCss": ".verdict-banner { border-radius: 20px; }",
   "components": {
@@ -172,17 +198,17 @@ The AI will:
 }
 ```
 
-See SKILL.md for the full config reference.
+See SKILL.md for the full config reference including all 4 data formats.
 
 ## Color presets
 
 | Preset | Accent | Use for |
 |--------|--------|---------|
-| `default` | Indigo | General purpose |
+| `default` | Indigo | General purpose, feature tracking |
 | `security` | Red | Security audits, vulnerability reports |
 | `performance` | Cyan | Performance audits, load testing |
-| `architecture` | Purple | Architecture reviews, design audits |
-| `code-quality` | Emerald | Code quality, linting, technical debt |
+| `architecture` | Purple | Architecture reviews, comparison reports |
+| `code-quality` | Emerald | Code quality, checklists, release gates |
 | `infra` | Orange | Infrastructure, deployment, DevOps |
 
 Each preset has tuned colors for both dark and light mode. Override any color with `theme: { dark: {...}, light: {...} }`.
@@ -196,25 +222,88 @@ Each preset has tuned colors for both dark and light mode. Override any color wi
 | `charts-first` | Charts before summary cards |
 | `list-first` | Minimal charts, findings list is the focus |
 
-## Findings JSON format
+## Data formats
+
+### Audit findings (severity-based)
 
 ```json
 [
   {
     "id": "C1",
-    "title": "Double-booking race condition",
+    "title": "API keys hardcoded in Docker image",
     "severity": "critical",
     "category": "Backend",
-    "location": "bookings.service.ts:450-525",
-    "impact": "Two concurrent bookings for the same slot both succeed",
-    "recommendation": "Add a partial unique index or re-check inside the transaction",
+    "location": "Dockerfile:24",
+    "impact": "Anyone with image access can extract keys",
+    "recommendation": "Use Docker secrets or runtime env injection",
     "effort": "2 hours",
-    "tags": ["race-condition", "database"]
+    "tags": ["secrets", "docker"]
   }
 ]
 ```
 
-Only `id`, `title`, and `severity` are required. Everything else is optional and gracefully omitted if missing.
+### Status items (feature tracking)
+
+```json
+[
+  {
+    "id": "F1",
+    "title": "Multi-currency checkout",
+    "description": "Support USD, EUR, GBP with real-time FX",
+    "status": "done",
+    "assignee": "Sarah Chen",
+    "progress": 100,
+    "category": "Checkout",
+    "tags": ["payments"]
+  }
+]
+```
+
+### Checklist items (release gates)
+
+```json
+[
+  {
+    "id": "C1",
+    "title": "All unit tests passing",
+    "checked": true,
+    "category": "Testing",
+    "owner": "Sarah"
+  }
+]
+```
+
+### Comparison data (tool evaluation)
+
+```json
+{
+  "options": [
+    { "name": "Elasticsearch", "verdict": "winner", "notes": "Best fit at our scale" }
+  ],
+  "criteria": [{ "name": "Performance" }, { "name": "Cost" }],
+  "optionsData": [
+    { "name": "Elasticsearch", "scores": { "Performance": 8, "Cost": 6 } }
+  ],
+  "prosCons": {
+    "Elasticsearch": { "pros": ["Mature"], "cons": ["High memory"] }
+  }
+}
+```
+
+See `examples/` for complete working demos of each report type.
+
+## Examples
+
+The `examples/` folder contains 4 showcase reports you can open directly:
+
+| File | Type | Description |
+|------|------|-------------|
+| `showcase-audit.html` | Audit | Security audit with 14 findings, verdict banner, charts |
+| `showcase-status.html` | Status | Product roadmap with 12 features, status cards, progress |
+| `showcase-checklist.html` | Checklist | Release checklist with 22 items, circular progress |
+| `showcase-comparison.html` | Comparison | Search infrastructure comparison, 3 options, pros/cons |
+
+Each has a matching `-config.json` file showing the full configuration.
 
 ## License
 

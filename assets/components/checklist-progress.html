@@ -1,0 +1,40 @@
+<!-- COMPONENT: checklist-progress -->
+<!-- SLOT: COMPONENT_MAIN_TOP (inside bento grid) -->
+<!-- DESCRIPTION: Circular progress showing checklist completion percentage. Use for release checklists and QA reports. Include when items have a "checked" boolean field. -->
+
+<!-- HTML -->
+<div class="chart-card checklist-progress-wrap">
+  <div class="chart-title">Checklist Progress</div>
+  <div class="checklist-circle-wrap">
+    <svg class="checklist-circle" viewBox="0 0 120 120" id="checklist-svg"></svg>
+    <div class="checklist-center">
+      <span class="checklist-pct" id="checklist-pct">0%</span>
+      <span class="checklist-detail" id="checklist-detail">0 of 0</span>
+    </div>
+  </div>
+</div>
+
+<!-- CSS -->
+.checklist-circle-wrap { position: relative; width: 130px; height: 130px; margin: 0 auto; }
+.checklist-circle { width: 130px; height: 130px; transform: rotate(-90deg); }
+.checklist-circle .track { fill: none; stroke: var(--surface-hover); stroke-width: 10; }
+.checklist-circle .fill { fill: none; stroke: var(--low); stroke-width: 10; stroke-linecap: round; transition: stroke-dasharray 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+.checklist-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
+.checklist-pct { font-size: 28px; font-weight: 700; display: block; line-height: 1; letter-spacing: -1px; color: var(--low); }
+.checklist-detail { font-size: 11px; color: var(--text-muted); margin-top: 4px; display: block; }
+
+<!-- JS -->
+function renderChecklistProgress() {
+  const total = ITEMS.length;
+  if (total === 0) return;
+  const done = ITEMS.filter(i => i.checked).length;
+  const pct = Math.round((done / total) * 100);
+  const radius = 50;
+  const circ = 2 * Math.PI * radius;
+  const fillLen = (pct / 100) * circ;
+  document.getElementById("checklist-svg").innerHTML =
+    `<circle class="track" cx="60" cy="60" r="${radius}"/>` +
+    `<circle class="fill" cx="60" cy="60" r="${radius}" stroke-dasharray="${fillLen} ${circ - fillLen}"/>`;
+  document.getElementById("checklist-pct").textContent = pct + "%";
+  document.getElementById("checklist-detail").textContent = `${done} of ${total}`;
+}

@@ -1,0 +1,37 @@
+<!-- COMPONENT: progress-bar -->
+<!-- SLOT: COMPONENT_MAIN_TOP (inside bento grid) -->
+<!-- DESCRIPTION: Overall completion progress bar with percentage. Use for feature/status tracking and checklists. Include when items have a "status" field. -->
+
+<!-- HTML -->
+<div class="chart-card progress-wrap">
+  <div class="chart-title">Overall Progress</div>
+  <div class="progress-display">
+    <div class="progress-track-large">
+      <div class="progress-fill-large" id="progress-fill"></div>
+    </div>
+    <div class="progress-info">
+      <span class="progress-pct" id="progress-pct">0%</span>
+      <span class="progress-detail" id="progress-detail"></span>
+    </div>
+  </div>
+</div>
+
+<!-- CSS -->
+.progress-display { display: flex; align-items: center; gap: 20px; }
+.progress-track-large { flex: 1; height: 12px; background: var(--surface-hover); border-radius: 6px; overflow: hidden; }
+.progress-fill-large { height: 100%; background: var(--accent); border-radius: 6px; transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+.progress-info { display: flex; flex-direction: column; align-items: flex-end; flex-shrink: 0; }
+.progress-pct { font-size: 28px; font-weight: 700; letter-spacing: -1px; line-height: 1; color: var(--accent); }
+.progress-detail { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+<!-- JS -->
+function renderProgressBar() {
+  const filtered = typeof getFilteredItems === "function" ? getFilteredItems() : ITEMS;
+  const total = filtered.length;
+  if (total === 0) return;
+  const done = filtered.filter(i => (i.status || "") === "done").length;
+  const pct = Math.round((done / total) * 100);
+  document.getElementById("progress-fill").style.width = pct + "%";
+  document.getElementById("progress-pct").textContent = pct + "%";
+  document.getElementById("progress-detail").textContent = `${done} of ${total} complete`;
+}

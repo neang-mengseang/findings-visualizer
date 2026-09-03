@@ -1,0 +1,139 @@
+{
+  "title": "Product Roadmap Status",
+  "subtitle": "Q1 2026 delivery progress for Acme Commerce",
+  "date": "January 20, 2026",
+  "items": [
+    {
+      "id": "F1",
+      "title": "Multi-currency checkout",
+      "description": "Support USD, EUR, GBP with real-time FX conversion at checkout",
+      "status": "done",
+      "assignee": "Sarah Chen",
+      "progress": 100,
+      "category": "Checkout",
+      "tags": ["payments", "internationalization"],
+      "notes": "Launched Jan 5. Using OpenExchangeRates API with 1hr cache. Conversion accuracy verified against 3 providers."
+    },
+    {
+      "id": "F2",
+      "title": "Abandoned cart recovery",
+      "description": "Automated email sequence for carts abandoned at checkout",
+      "status": "in-progress",
+      "assignee": "Mike Park",
+      "progress": 72,
+      "category": "Marketing",
+      "tags": ["email", "automation", "conversion"],
+      "notes": "Email templates done. SendGrid integration complete. Waiting on marketing team for copy review and A/B test setup."
+    },
+    {
+      "id": "F3",
+      "title": "Subscription billing engine",
+      "description": "Recurring payments with Stripe Billing, dunning management, and proration",
+      "status": "in-progress",
+      "assignee": "John Lee",
+      "progress": 45,
+      "category": "Payments",
+      "tags": ["stripe", "recurring", "billing"],
+      "notes": "Stripe Billing API integrated. Dunning email flow in progress. Need to build admin UI for subscription management."
+    },
+    {
+      "id": "F4",
+      "title": "Product reviews and ratings",
+      "description": "Customer review system with photo uploads, helpful votes, and seller responses",
+      "status": "todo",
+      "assignee": "Lisa Wang",
+      "progress": 0,
+      "category": "Catalog",
+      "tags": ["reviews", "ugc", "social-proof"]
+    },
+    {
+      "id": "F5",
+      "title": "Advanced search with filters",
+      "description": "Faceted search with price range, brand, category, and attribute filters",
+      "status": "todo",
+      "assignee": "Sarah Chen",
+      "progress": 0,
+      "category": "Catalog",
+      "tags": ["search", "elasticsearch", "filters"]
+    },
+    {
+      "id": "F6",
+      "title": "Mobile app push notifications",
+      "description": "Order updates, price drop alerts, and back-in-stock notifications via FCM",
+      "status": "done",
+      "assignee": "Mike Park",
+      "progress": 100,
+      "category": "Mobile",
+      "tags": ["fcm", "notifications", "engagement"],
+      "notes": "Shipped to production Jan 12. 34% opt-in rate. Open rate at 22%, above industry average of 18%."
+    },
+    {
+      "id": "F7",
+      "title": "B2B wholesale portal",
+      "description": "Tiered pricing, bulk ordering, NET-30 payment terms for business customers",
+      "status": "blocked",
+      "assignee": "John Lee",
+      "progress": 15,
+      "category": "B2B",
+      "tags": ["wholesale", "b2b", "pricing"],
+      "notes": "Blocked on legal review of NET-30 terms. Need credit check integration before proceeding. ETA: 2 weeks."
+    },
+    {
+      "id": "F8",
+      "title": "Analytics dashboard",
+      "description": "Revenue, conversion, AOV, and cohort analysis charts for admins",
+      "status": "done",
+      "assignee": "Lisa Wang",
+      "progress": 100,
+      "category": "Analytics",
+      "tags": ["charts", "reporting", "admin"]
+    },
+    {
+      "id": "F9",
+      "title": "Wishlist and price drop alerts",
+      "description": "Save items for later, get notified when price drops below threshold",
+      "status": "in-progress",
+      "assignee": "Sarah Chen",
+      "progress": 60,
+      "category": "Catalog",
+      "tags": ["wishlist", "alerts", "engagement"]
+    },
+    {
+      "id": "F10",
+      "title": "Tax automation (Avalara)",
+      "description": "Real-time tax calculation and filing automation for US and EU",
+      "status": "todo",
+      "assignee": "John Lee",
+      "progress": 0,
+      "category": "Checkout",
+      "tags": ["tax", "compliance", "avalara"]
+    },
+    {
+      "id": "F11",
+      "title": "GraphQL API for mobile",
+      "description": "Migrate mobile client from REST to GraphQL for reduced payload and better caching",
+      "status": "in-progress",
+      "assignee": "Mike Park",
+      "progress": 30,
+      "category": "Backend",
+      "tags": ["graphql", "mobile", "performance"]
+    },
+    {
+      "id": "F12",
+      "title": "Customer support chat widget",
+      "description": "In-app live chat with agent routing and canned responses",
+      "status": "todo",
+      "assignee": "Lisa Wang",
+      "progress": 0,
+      "category": "Support",
+      "tags": ["chat", "support", "realtime"]
+    }
+  ],
+  "preset": "default",
+  "layout": "default",
+  "brand": {
+    "author": "Product Team",
+    "company": "Acme Commerce",
+    "footer": "Internal roadmap - not for external distribution"
+  }
+}

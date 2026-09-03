@@ -1,0 +1,196 @@
+<!-- COMPONENT: comparison-table -->
+<!-- SLOT: COMPONENT_MAIN_TOP (after bento) -->
+<!-- DESCRIPTION: Side-by-side comparison of options with criteria scores, pros, and cons. Use for tool/approach comparison reports. Include when data has "comparison" with "options" and "criteria". -->
+
+<!-- HTML -->
+<div class="comparison-section">
+  <div class="comparison-header">
+    <h3 class="comparison-title">Option Comparison</h3>
+    <p class="comparison-subtitle">Scored across <span id="comp-criteria-count">0</span> criteria</p>
+  </div>
+  <div class="comparison-wrap" id="comparison-wrap"></div>
+  <div class="comparison-summary" id="comparison-summary"></div>
+  <div class="pros-cons-grid" id="pros-cons-grid"></div>
+</div>
+
+<!-- CSS -->
+.comparison-section { display: flex; flex-direction: column; gap: 20px; }
+.comparison-header { padding: 4px 0; }
+.comparison-title { font-size: 18px; font-weight: 700; letter-spacing: -0.4px; }
+.comparison-subtitle { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+
+.comparison-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); }
+.comparison-table {
+  width: 100%; border-collapse: separate; border-spacing: 0; background: var(--surface);
+}
+.comparison-table th, .comparison-table td {
+  padding: 16px 20px; text-align: left; border-bottom: 1px solid var(--border-subtle);
+}
+.comparison-table th {
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px;
+  color: var(--text-dim); background: var(--surface-hover); border-bottom: 2px solid var(--border);
+  position: sticky; top: 0;
+}
+.comparison-table th.option-col {
+  font-size: 16px; text-transform: none; letter-spacing: -0.3px; color: var(--text); font-weight: 700;
+  padding: 18px 20px;
+}
+.comparison-table th.option-col .verdict-badge {
+  display: inline-block; font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.6px; margin-top: 6px; padding: 3px 10px; border-radius: 20px;
+}
+.comparison-table th.option-col .verdict-badge.winner { background: var(--low-bg); color: var(--low-text); }
+.comparison-table th.option-col .verdict-badge.alternative { background: var(--accent-bg); color: var(--accent); }
+.comparison-table th.option-col .verdict-badge.overkill { background: var(--surface-hover); color: var(--text-muted); }
+.comparison-table th.option-col .verdict-badge.runner-up { background: var(--medium-bg); color: var(--medium-text); }
+.comparison-table td { font-size: 13px; color: var(--text); }
+.comparison-table td:first-child {
+  font-weight: 600; color: var(--text-muted); width: 200px; white-space: nowrap;
+  background: var(--surface-hover);
+}
+.comparison-table tr:last-child td { border-bottom: none; }
+.comparison-table tr:hover td { background: var(--surface-hover); }
+.comparison-table tr:hover td:first-child { background: var(--border-subtle); }
+
+.score-cell { display: flex; align-items: center; gap: 10px; }
+.score-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; transition: var(--transition); }
+.score-dot.good { background: var(--low); box-shadow: 0 0 8px var(--low-bg); }
+.score-dot.ok { background: var(--medium); box-shadow: 0 0 8px var(--medium-bg); }
+.score-dot.bad { background: var(--critical); box-shadow: 0 0 8px var(--critical-bg); }
+.score-dot.na { background: var(--text-dim); }
+.score-value { font-weight: 600; }
+.score-value.good { color: var(--low-text); }
+.score-value.ok { color: var(--medium-text); }
+.score-value.bad { color: var(--critical-text); }
+.score-value.na { color: var(--text-dim); }
+
+.comparison-summary {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;
+}
+.comp-summary-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 18px 20px; box-shadow: var(--shadow); transition: var(--transition); position: relative; overflow: hidden;
+}
+.comp-summary-card::before {
+  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px; transition: var(--transition);
+}
+.comp-summary-card.winner::before { background: var(--low); }
+.comp-summary-card.alternative::before { background: var(--accent); }
+.comp-summary-card.overkill::before { background: var(--text-dim); }
+.comp-summary-card.runner-up::before { background: var(--medium); }
+.comp-summary-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
+.comp-summary-card .card-name { font-size: 15px; font-weight: 700; letter-spacing: -0.3px; }
+.comp-summary-card .card-score { font-size: 28px; font-weight: 700; letter-spacing: -1px; margin-top: 8px; line-height: 1; }
+.comp-summary-card.winner .card-score { color: var(--low); }
+.comp-summary-card.alternative .card-score { color: var(--accent); }
+.comp-summary-card.overkill .card-score { color: var(--text-muted); }
+.comp-summary-card.runner-up .card-score { color: var(--medium); }
+.comp-summary-card .card-score-label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.6px; margin-top: 4px; }
+.comp-summary-card .card-notes { font-size: 12px; color: var(--text-muted); margin-top: 10px; line-height: 1.5; }
+
+.pros-cons-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+.pros-cons-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 20px; box-shadow: var(--shadow); transition: var(--transition);
+}
+.pros-cons-card:hover { border-color: var(--text-dim); box-shadow: var(--shadow-hover); }
+.pros-cons-card h4 {
+  font-size: 14px; font-weight: 700; margin-bottom: 14px; padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-subtle); display: flex; align-items: center; gap: 8px;
+}
+.pros-cons-card .pc-option { color: var(--text); }
+.pros-cons-card .pc-type { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; padding: 3px 8px; border-radius: 20px; }
+.pros-cons-card.pros .pc-type { background: var(--low-bg); color: var(--low-text); }
+.pros-cons-card.cons .pc-type { background: var(--critical-bg); color: var(--critical-text); }
+.pros-cons-card ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.pros-cons-card li {
+  font-size: 13px; color: var(--text); padding-left: 22px; position: relative; line-height: 1.5;
+}
+.pros-cons-card.pros li::before {
+  content: ""; position: absolute; left: 0; top: 6px; width: 14px; height: 8px;
+  border-left: 2px solid var(--low); border-bottom: 2px solid var(--low);
+  transform: rotate(-45deg);
+}
+.pros-cons-card.cons li::before {
+  content: "✕"; position: absolute; left: 0; top: 0;
+  color: var(--critical); font-size: 14px; font-weight: 600; line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+  .comparison-table th, .comparison-table td { padding: 12px 14px; }
+  .comparison-table td:first-child { width: 120px; }
+  .pros-cons-grid { grid-template-columns: 1fr; }
+}
+
+<!-- JS -->
+function renderComparisonTable() {
+  let options = COMPARISON.options || [];
+  const criteria = COMPARISON.criteria || [];
+  if (COMPARISON.optionsData) {
+    const scoreMap = {};
+    COMPARISON.optionsData.forEach(od => { scoreMap[od.name] = od.scores || {}; });
+    options = options.map(opt => ({ ...opt, scores: { ...(scoreMap[opt.name] || {}), ...(opt.scores || {}) } }));
+  }
+  if (options.length === 0) return;
+
+  document.getElementById("comp-criteria-count").textContent = criteria.length;
+
+  // Summary cards with total scores
+  const summaryHtml = options.map(opt => {
+    const scores = Object.values(opt.scores || {}).filter(v => typeof v === "number");
+    const total = scores.reduce((a, b) => a + b, 0);
+    const max = scores.length * 10;
+    const pct = max > 0 ? Math.round((total / max) * 100) : 0;
+    const verdictClass = opt.verdict || "";
+    return `
+    <div class="comp-summary-card ${verdictClass}">
+      <div class="card-name">${escapeHtml(opt.name)}</div>
+      <div class="card-score">${pct}%</div>
+      <div class="card-score-label">${total}/${max} points</div>
+      ${opt.notes ? `<div class="card-notes">${escapeHtml(opt.notes)}</div>` : ""}
+    </div>`;
+  }).join("");
+  document.getElementById("comparison-summary").innerHTML = summaryHtml;
+
+  // Comparison table
+  let html = '<table class="comparison-table"><thead><tr><th>Criteria</th>';
+  options.forEach(opt => {
+    const verdictClass = opt.verdict || "";
+    const verdictLabel = opt.verdict ? `<span class="verdict-badge ${verdictClass}">${escapeHtml(opt.verdict)}</span>` : "";
+    html += `<th class="option-col">${escapeHtml(opt.name)}${verdictLabel}</th>`;
+  });
+  html += "</tr></thead><tbody>";
+
+  criteria.forEach(crit => {
+    html += `<tr><td>${escapeHtml(crit.name)}</td>`;
+    options.forEach(opt => {
+      const val = opt.scores?.[crit.name];
+      if (val == null) {
+        html += `<td><span class="score-cell"><span class="score-dot na"></span><span class="score-value na">N/A</span></span></td>`;
+      } else if (typeof val === "string") {
+        const cls = val.toLowerCase().includes("good") || val.toLowerCase().includes("yes") ? "good"
+          : val.toLowerCase().includes("bad") || val.toLowerCase().includes("no") ? "bad" : "ok";
+        html += `<td><span class="score-cell"><span class="score-dot ${cls}"></span><span class="score-value ${cls}">${escapeHtml(val)}</span></span></td>`;
+      } else {
+        const cls = val >= 8 ? "good" : val >= 5 ? "ok" : "bad";
+        html += `<td><span class="score-cell"><span class="score-dot ${cls}"></span><span class="score-value ${cls}">${val}/10</span></span></td>`;
+      }
+    });
+    html += "</tr>";
+  });
+
+  html += "</tbody></table>";
+  document.getElementById("comparison-wrap").innerHTML = html;
+
+  // Pros/cons cards
+  if (COMPARISON.prosCons) {
+    let pcHtml = "";
+    options.forEach(opt => {
+      const pc = COMPARISON.prosCons[opt.name];
+      if (!pc) return;
+      pcHtml += `<div class="pros-cons-card pros"><h4><span class="pc-option">${escapeHtml(opt.name)}</span><span class="pc-type">Pros</span></h4><ul>${(pc.pros || []).map(p => `<li>${escapeHtml(p)}</li>`).join("")}</ul></div>`;
+      pcHtml += `<div class="pros-cons-card cons"><h4><span class="pc-option">${escapeHtml(opt.name)}</span><span class="pc-type">Cons</span></h4><ul>${(pc.cons || []).map(c => `<li>${escapeHtml(c)}</li>`).join("")}</ul></div>`;
+    });
+    document.getElementById("pros-cons-grid").innerHTML = pcHtml;
+  }
+}

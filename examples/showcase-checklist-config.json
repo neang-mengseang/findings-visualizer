@@ -1,0 +1,36 @@
+{
+  "title": "Production Release Checklist v3.0",
+  "subtitle": "Go-live readiness for Acme Commerce v3.0",
+  "date": "January 20, 2026",
+  "items": [
+    { "id": "C1", "title": "All unit tests passing (coverage > 80%)", "checked": true, "category": "Testing", "owner": "Sarah" },
+    { "id": "C2", "title": "Integration tests passing on staging", "checked": true, "category": "Testing", "owner": "Sarah" },
+    { "id": "C3", "title": "E2E tests passing (Playwright suite)", "checked": true, "category": "Testing", "owner": "Mike" },
+    { "id": "C4", "title": "Load test: 5000 concurrent users", "checked": false, "category": "Testing", "owner": "Mike", "notes": "k6 script ready. Need staging DB scale-up before running." },
+    { "id": "C5", "title": "Security scan completed (no criticals)", "checked": true, "category": "Security", "owner": "Sarah" },
+    { "id": "C6", "title": "Penetration test remediation verified", "checked": true, "category": "Security", "owner": "Sarah" },
+    { "id": "C7", "title": "Secrets rotated since last release", "checked": false, "category": "Security", "owner": "John", "notes": "Stripe and SendGrid keys need rotation. Scheduled for Thursday." },
+    { "id": "C8", "title": "Database migrations applied on staging", "checked": true, "category": "Database", "owner": "John" },
+    { "id": "C9", "title": "Backup verified and restorable", "checked": true, "category": "Database", "owner": "John" },
+    { "id": "C10", "title": "Rollback plan documented and tested", "checked": false, "category": "Database", "owner": "John", "notes": "Rollback script written but not yet tested on staging. Scheduled for Friday." },
+    { "id": "C11", "title": "API documentation updated", "checked": true, "category": "Documentation", "owner": "Lisa" },
+    { "id": "C12", "title": "Changelog written and reviewed", "checked": true, "category": "Documentation", "owner": "Lisa" },
+    { "id": "C13", "title": "Customer-facing release notes prepared", "checked": false, "category": "Documentation", "owner": "Lisa", "notes": "Draft ready, waiting on marketing review for tone and positioning." },
+    { "id": "C14", "title": "Caddy reverse proxy config verified", "checked": true, "category": "Infrastructure", "owner": "John" },
+    { "id": "C15", "title": "Docker images built, tagged, and pushed", "checked": true, "category": "Infrastructure", "owner": "John" },
+    { "id": "C16", "title": "SSL certificates valid (> 60 days remaining)", "checked": true, "category": "Infrastructure", "owner": "John" },
+    { "id": "C17", "title": "Monitoring dashboards updated", "checked": false, "category": "Infrastructure", "owner": "Mike", "notes": "New Grafana panels needed for subscription billing metrics." },
+    { "id": "C18", "title": "Alert thresholds calibrated", "checked": true, "category": "Infrastructure", "owner": "Mike" },
+    { "id": "C19", "title": "On-call rotation confirmed for launch week", "checked": true, "category": "Operations", "owner": "Sarah" },
+    { "id": "C20", "title": "Incident response runbook updated", "checked": false, "category": "Operations", "owner": "Sarah", "notes": "Need to add subscription billing failure scenarios." },
+    { "id": "C21", "title": "Feature flags configured for gradual rollout", "checked": true, "category": "Operations", "owner": "Mike" },
+    { "id": "C22", "title": "Customer support team briefed on new features", "checked": false, "category": "Operations", "owner": "Lisa", "notes": "Training session scheduled for Monday next week." }
+  ],
+  "preset": "code-quality",
+  "layout": "default",
+  "brand": {
+    "author": "DevOps Team",
+    "company": "Acme Commerce",
+    "footer": "Internal use only - do not distribute"
+  }
+}

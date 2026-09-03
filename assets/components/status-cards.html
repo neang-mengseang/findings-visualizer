@@ -1,0 +1,54 @@
+<!-- COMPONENT: status-cards -->
+<!-- SLOT: COMPONENT_MAIN_TOP (inside bento grid) -->
+<!-- DESCRIPTION: Count cards grouped by status. Use for feature/status tracking reports. Include when items have a "status" field. -->
+
+<!-- HTML -->
+<div class="status-summary" id="status-summary"></div>
+
+<!-- CSS -->
+.status-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
+.status-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 20px; display: flex; flex-direction: column; gap: 6px;
+  box-shadow: var(--shadow); transition: var(--transition); position: relative; overflow: hidden;
+  cursor: pointer;
+}
+.status-card::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px; opacity: 0.6; transition: var(--transition); }
+.status-card.done::before { background: var(--low); }
+.status-card.in-progress::before { background: var(--accent); }
+.status-card.todo::before { background: var(--text-dim); }
+.status-card.blocked::before { background: var(--critical); }
+.status-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); border-color: var(--text-dim); }
+.status-card:hover::before { opacity: 1; height: 3px; }
+.status-card .num { font-size: 32px; font-weight: 700; letter-spacing: -1.5px; line-height: 1; }
+.status-card .label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; font-weight: 500; }
+.status-card.done .num { color: var(--low); }
+.status-card.in-progress .num { color: var(--accent); }
+.status-card.todo .num { color: var(--text-muted); }
+.status-card.blocked .num { color: var(--critical); }
+
+<!-- JS -->
+function renderStatusCards() {
+  const filtered = typeof getFilteredItems === "function" ? getFilteredItems() : ITEMS;
+  const counts = {};
+  filtered.forEach(item => {
+    const s = item.status || "todo";
+    counts[s] = (counts[s] || 0) + 1;
+  });
+  const order = ["done", "in-progress", "todo", "blocked"];
+  const labels = { "done": "Done", "in-progress": "In Progress", "todo": "To Do", "blocked": "Blocked" };
+  const seen = [...new Set(filtered.map(i => i.status || "todo"))];
+  const all = [...order.filter(s => counts[s]), ...seen.filter(s => !order.includes(s))];
+  const total = filtered.length;
+  document.getElementById("status-summary").innerHTML = all.map(s =>
+    `<div class="status-card ${s}" onclick="filterByStatus('${s}')" title="Filter by ${labels[s] || s}"><span class="num">${counts[s]}</span><span class="label">${escapeHtml(labels[s] || s)}</span></div>`
+  ).join("");
+}
+
+function filterByStatus(status) {
+  activeStatus = activeStatus === status ? "all" : status;
+  document.querySelectorAll("#status-filters .filter-btn").forEach(b => {
+    b.classList.toggle("active", b.dataset.status === activeStatus);
+  });
+  refreshAll();
+}

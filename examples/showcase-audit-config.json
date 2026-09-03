@@ -1,0 +1,189 @@
+{
+  "title": "Security Audit Report",
+  "subtitle": "Production readiness review for Acme Commerce Platform",
+  "date": "December 15, 2026",
+  "findings": [
+    {
+      "id": "C1",
+      "title": "API keys hardcoded in Docker image",
+      "severity": "critical",
+      "category": "Backend",
+      "location": "Dockerfile:24, config.ts:8",
+      "impact": "Anyone with image access can extract Stripe, SendGrid, and Twilio API keys. Full access to payment, email, and SMS services.",
+      "recommendation": "Use Docker secrets or runtime env injection. Rotate all exposed keys immediately. Never bake secrets into images.",
+      "effort": "2 hours",
+      "tags": ["secrets", "docker", "payments"]
+    },
+    {
+      "id": "C2",
+      "title": "SQL injection in product search endpoint",
+      "severity": "critical",
+      "category": "Backend",
+      "location": "products.service.ts:145-160",
+      "impact": "Attackers can read, modify, or delete any data in the database via crafted search queries.",
+      "recommendation": "Use parameterized queries via Prisma's where clause. Never concatenate user input into raw SQL.",
+      "effort": "3 hours",
+      "tags": ["injection", "database", "owasp"]
+    },
+    {
+      "id": "C3",
+      "title": "Authentication bypass on admin endpoints",
+      "severity": "critical",
+      "category": "Backend",
+      "location": "admin.guard.ts:18-22",
+      "impact": "6 admin API endpoints have no auth guard. Anyone can access user management, order refunds, and system config.",
+      "recommendation": "Add JwtAuthGuard + AdminGuard to all admin routes. Add integration test verifying 401 on unauthenticated requests.",
+      "effort": "4 hours",
+      "tags": ["auth", "admin", "access-control"]
+    },
+    {
+      "id": "H1",
+      "title": "Rate limiting missing on login and registration",
+      "severity": "high",
+      "category": "Backend",
+      "location": "auth.controller.ts",
+      "impact": "Brute force attacks on login can succeed. Credential stuffing at scale with no throttling.",
+      "recommendation": "Add @nestjs/throttler with 10 attempts per minute on login, 3 per hour on registration. Add Redis-backed throttler for distributed rate limiting.",
+      "effort": "4 hours",
+      "tags": ["brute-force", "auth", "owasp"]
+    },
+    {
+      "id": "H2",
+      "title": "CORS configured to allow all origins",
+      "severity": "high",
+      "category": "Backend",
+      "location": "main.ts:28",
+      "impact": "Any website can make authenticated cross-origin requests to the API. Enables CSRF-style attacks from malicious sites.",
+      "recommendation": "Whitelist specific domains: localhost, acme.shop, admin.acme.shop. Use config-based origin list for environment flexibility.",
+      "effort": "1 hour",
+      "tags": ["cors", "config", "owasp"]
+    },
+    {
+      "id": "H3",
+      "title": "User session tokens never expire",
+      "severity": "high",
+      "category": "Backend",
+      "location": "jwt.strategy.ts:12",
+      "impact": "Stolen JWT tokens are valid forever. No way to revoke access without secret rotation.",
+      "recommendation": "Set access token expiry to 15min, refresh token to 24h. Implement refresh token rotation with reuse detection.",
+      "effort": "1 day",
+      "tags": ["sessions", "jwt", "auth"]
+    },
+    {
+      "id": "H4",
+      "title": "File upload accepts arbitrary MIME types",
+      "severity": "high",
+      "category": "Backend",
+      "location": "upload.controller.ts:34",
+      "impact": "Users can upload executable files, HTML with scripts, or malicious payloads. Stored files served directly could execute XSS.",
+      "recommendation": "Whitelist allowed MIME types (image/jpeg, image/png, application/pdf). Validate file signatures, not just headers. Strip metadata from images.",
+      "effort": "6 hours",
+      "tags": ["file-upload", "xss", "owasp"]
+    },
+    {
+      "id": "M1",
+      "title": "Password policy too weak",
+      "severity": "medium",
+      "category": "Backend",
+      "location": "auth.dto.ts:12",
+      "impact": "Users can set easily guessable passwords like '123456' or 'password'. Vulnerable to dictionary attacks.",
+      "recommendation": "Require min 10 chars, 1 uppercase, 1 number, 1 special char. Check against HaveIBeenPwned API. Use class-validator decorators.",
+      "effort": "3 hours",
+      "tags": ["passwords", "auth"]
+    },
+    {
+      "id": "M2",
+      "title": "No audit log for admin actions",
+      "severity": "medium",
+      "category": "Dashboard",
+      "location": "admin/*",
+      "impact": "No traceability for sensitive operations like refunds, user deletion, or config changes. Cannot investigate incidents.",
+      "recommendation": "Create AuditLog entity. Log all admin mutations with actor, action, target, before/after, timestamp, IP. Add admin UI to view logs.",
+      "effort": "2 days",
+      "tags": ["audit", "compliance", "admin"]
+    },
+    {
+      "id": "M3",
+      "title": "Error responses include stack traces in production",
+      "severity": "medium",
+      "category": "Backend",
+      "location": "main.ts:45",
+      "impact": "Internal implementation details, file paths, and library versions leaked to API consumers. Aids attackers in reconnaissance.",
+      "recommendation": "Set NestJS to production mode. Use a global exception filter that returns generic messages with error codes. Log full errors server-side only.",
+      "effort": "2 hours",
+      "tags": ["info-leak", "errors"]
+    },
+    {
+      "id": "M4",
+      "title": "PII stored in plain text logs",
+      "severity": "medium",
+      "category": "Backend",
+      "location": "logger.config.ts, auth.service.ts",
+      "impact": "Emails, phone numbers, and partial card numbers appear in application logs. GDPR violation if logs are shared or retained.",
+      "recommendation": "Implement a log sanitization pipe that masks PII fields. Use structured logging with redaction. Review all log statements for PII.",
+      "effort": "1 day",
+      "tags": ["pii", "gdpr", "logging"]
+    },
+    {
+      "id": "L1",
+      "title": "Missing security headers (CSP, HSTS, X-Frame-Options)",
+      "severity": "low",
+      "category": "Infrastructure",
+      "location": "Caddyfile",
+      "impact": "No Content-Security-Policy allows inline scripts. No HSTS means downgrade attacks. Clickjacking possible without X-Frame-Options.",
+      "recommendation": "Add header directives in Caddyfile: CSP with strict-dynamic, HSTS with 1-year max-age, X-Frame-Options DENY, X-Content-Type-Options nosniff.",
+      "effort": "1 hour",
+      "tags": ["headers", "csp", "hsts"]
+    },
+    {
+      "id": "L2",
+      "title": "Dependencies not pinned, 4 known CVEs",
+      "severity": "low",
+      "category": "Infrastructure",
+      "location": "package.json, package-lock.json",
+      "impact": "Minor version updates can introduce breaking changes. 4 dependencies have known CVEs (2 medium, 2 low).",
+      "recommendation": "Pin all dependencies to exact versions. Run pnpm audit in CI. Update vulnerable packages. Add Dependabot or Renovate for automated PRs.",
+      "effort": "4 hours",
+      "tags": ["dependencies", "cve", "supply-chain"]
+    },
+    {
+      "id": "L3",
+      "title": "Database backups not encrypted",
+      "severity": "low",
+      "category": "Infrastructure",
+      "location": "backup-script.sh",
+      "impact": "If backup storage is compromised, all user data is accessible in plain text.",
+      "recommendation": "Encrypt backups with AES-256 using a managed KMS key. Store encryption keys separately from backup storage. Test restore from encrypted backup.",
+      "effort": "1 day",
+      "tags": ["backups", "encryption", "infra"]
+    }
+  ],
+  "strengths": [
+    "Payment processing uses Stripe webhook signature verification with idempotency keys, preventing replay attacks",
+    "Password hashing uses bcrypt with cost factor 12, exceeding OWASP minimum recommendations",
+    "All database queries go through Prisma ORM with parameterized queries (except the one SQL injection finding)",
+    "TLS 1.3 enforced across all environments with perfect forward secrecy",
+    "Role-based access control is enforced at both route guard and service layer level",
+    "API rate limiting is implemented on payment and checkout endpoints using Redis-backed throttler"
+  ],
+  "preset": "security",
+  "layout": "default",
+  "brand": {
+    "author": "Security Team",
+    "company": "Acme Commerce",
+    "footer": "Confidential - Internal Use Only"
+  },
+  "components": {
+    "verdict": {
+      "status": "fail",
+      "title": "NOT READY FOR PRODUCTION",
+      "subtitle": "3 critical vulnerabilities must be resolved before launch"
+    },
+    "stats": [
+      { "num": "148", "label": "Endpoints tested", "icon": "api" },
+      { "num": "23", "label": "DB tables reviewed", "icon": "file" },
+      { "num": "14", "label": "Vulnerabilities found", "icon": "shield" },
+      { "num": "6", "label": "Strengths identified", "icon": "check" }
+    ]
+  }
+}

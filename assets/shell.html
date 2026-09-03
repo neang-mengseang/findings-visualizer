@@ -86,14 +86,31 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); font
   border-right: 1px solid var(--border); padding: 28px 20px;
   position: sticky; top: 0; flex-shrink: 0; display: flex; flex-direction: column; gap: 28px;
   overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
 }
-.main { flex: 1; padding: 36px 44px; width: 100%; }
+.sidebar::-webkit-scrollbar { width: 6px; }
+.sidebar::-webkit-scrollbar-track { background: transparent; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+.sidebar::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
+.sidebar:hover::-webkit-scrollbar-thumb { background: var(--text-dim); }
+.main { flex: 1; padding: 36px 44px; width: 100%; overflow-x: hidden; }
+.main::-webkit-scrollbar { width: 8px; height: 8px; }
+.main::-webkit-scrollbar-track { background: transparent; }
+.main::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+.main::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
+* { scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; transition: background 0.2s; }
+*::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
 .main-header { margin-bottom: 36px; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
 .main-header-text { flex: 1; min-width: 0; }
 .main-header h2 { font-size: 26px; font-weight: 700; letter-spacing: -0.6px; line-height: 1.2; }
 .main-header p { font-size: 14px; color: var(--text-muted); margin-top: 8px; }
 .generated-date { font-size: 12px; color: var(--text-dim); margin-top: 12px; font-family: var(--mono); }
 .main-header .export-bar { margin-bottom: 0; flex-shrink: 0; }
+.header-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 @media (max-width: 600px) {
   .main-header { flex-direction: column; }
   .main-header .export-bar { flex-direction: row; flex-wrap: wrap; }
@@ -157,7 +174,7 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); font
   <aside class="sidebar">
     <div class="sidebar-brand">
       <!-- {{BRAND_HEADER}} -->
-      <h1>Audit Report</h1>
+      <h1>__SIDEBAR_TITLE__</h1>
       <p>__REPORT_SUBTITLE__</p>
     </div>
     <!-- {{COMPONENT_SIDEBAR}} -->
@@ -199,8 +216,13 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); font
 <script>
 const FINDINGS = __FINDINGS_JSON__;
 const STRENGTHS = __STRENGTHS_JSON__;
+const ITEMS = __ITEMS_JSON__;
+const COMPARISON = __COMPARISON_JSON__;
 let activeSeverity = "all";
+let activeStatus = "all";
 let activeCategory = null;
+let activeAssignee = null;
+let activeOwner = null;
 let searchTerm = "";
 let sortBy = "severity";
 let allExpanded = false;

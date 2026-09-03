@@ -72,6 +72,9 @@ const DEFAULT_ORDER = [
   "verdict-banner",
   "summary-cards",
   "stats-bar",
+  "status-cards",
+  "progress-bar",
+  "checklist-progress",
   "severity-chart",
   "category-chart",
   "effort-chart",
@@ -81,6 +84,9 @@ const DEFAULT_ORDER = [
   "finding-controls",
   "strengths-list",
   "findings-list",
+  "feature-list",
+  "comparison-table",
+  "checklist-list",
   "theme-toggle",
 ];
 
@@ -103,7 +109,9 @@ if (args.includes("--help") || args.includes("-h")) {
     title       (required) Report title
     subtitle    (required) Subtitle
     date        (optional) Date string, defaults to today
-    findings    (required) Path to findings JSON file OR inline array
+    findings    (required for audit) Path to findings JSON OR inline array. Items with "severity" field.
+    items       (required for status/checklist) Path to items JSON OR inline array. Items with "status" or "checked" field.
+    comparison  (required for comparison) Object with "options" and "criteria" arrays.
     strengths   (optional) Path to strengths JSON file OR inline array
 
     preset      (optional) Color preset: "security" | "performance" | "architecture" | "code-quality" | "infra" | "default"
@@ -148,17 +156,35 @@ const configDir = path.dirname(path.resolve(configPath));
 const config = readJSON(configPath, "Config");
 
 if (!config.title) { console.error("Config missing required field: title"); process.exit(1); }
-if (!config.findings) { console.error("Config missing required field: findings"); process.exit(1); }
+if (!config.findings && !config.items && !config.comparison) {
+  console.error("Config missing required field: one of 'findings', 'items', or 'comparison' is required");
+  process.exit(1);
+}
 
-// --- Resolve findings ---
-let findings = config.findings;
+// --- Resolve findings (audit type: items with severity) ---
+let findings = config.findings || [];
 if (typeof findings === "string") {
   const fpath = path.isAbsolute(findings) ? findings : path.join(configDir, findings);
   findings = readJSON(fpath, "Findings");
 }
 if (!Array.isArray(findings)) { console.error("Findings must be an array or path to JSON array"); process.exit(1); }
 
-// --- Validate findings ---
+// --- Resolve items (status/checklist type: items with status or checked) ---
+let items = config.items || [];
+if (typeof items === "string") {
+  const ipath = path.isAbsolute(items) ? items : path.join(configDir, items);
+  items = readJSON(ipath, "Items");
+}
+if (!Array.isArray(items)) { console.error("Items must be an array or path to JSON array"); process.exit(1); }
+
+// --- Resolve comparison data ---
+let comparison = config.comparison || null;
+if (typeof comparison === "string") {
+  const cpath = path.isAbsolute(comparison) ? comparison : path.join(configDir, comparison);
+  comparison = readJSON(cpath, "Comparison");
+}
+
+// --- Validate findings (only if present) ---
 const VALID_SEVERITIES = ["critical", "high", "medium", "low"];
 const errors = [];
 findings.forEach((f, i) => {
@@ -172,6 +198,24 @@ if (errors.length > 0) {
   errors.forEach(e => console.error(`  - ${e}`));
   process.exit(1);
 }
+
+// --- Validate items (only if present) ---
+items.forEach((item, i) => {
+  if (!item.id) errors.push(`Item ${i}: missing "id"`);
+  if (!item.title) errors.push(`Item ${i}: missing "title"`);
+});
+if (errors.length > 0) {
+  console.error("Items validation failed:");
+  errors.forEach(e => console.error(`  - ${e}`));
+  process.exit(1);
+}
+
+// --- Detect report type from data shape ---
+const hasSeverity = findings.length > 0 && findings.some(f => f.severity);
+const hasStatus = items.length > 0 && items.some(i => i.status);
+const hasChecked = items.length > 0 && items.some(i => typeof i.checked === "boolean");
+const hasComparison = comparison && comparison.options && comparison.options.length > 0;
+const reportType = hasComparison ? "comparison" : hasChecked ? "checklist" : hasStatus ? "status" : "audit";
 
 // --- Resolve strengths ---
 let strengths = config.strengths || [];
@@ -223,13 +267,24 @@ if (config.components?.order && Array.isArray(config.components.order)) {
 }
 
 // Auto-include logic: if using default order, auto-add/remove based on data
-const includeSearch = findings.length > 5;
+const includeSearch = (findings.length > 5) || (items.length > 5);
 const includeVerdict = config.components?.verdict !== undefined && config.components?.verdict !== false;
 const includeStats = config.components?.stats !== undefined && config.components?.stats !== false;
 const includeStrengths = Array.isArray(strengths) && strengths.length > 0;
 const includeCategoryChart = findings.some(f => f.category);
 const includeEffortChart = findings.some(f => f.effort);
 const includeHeatmap = findings.some(f => f.category) && findings.some(f => f.severity);
+
+// Type-specific auto-include
+const includeAuditComponents = reportType === "audit";
+const includeStatusComponents = reportType === "status" || reportType === "checklist";
+const includeComparisonComponents = reportType === "comparison";
+const includeStatusCards = items.length > 0 && items.some(i => i.status);
+const includeProgressBar = items.length > 0 && items.some(i => i.status);
+const includeChecklistProgress = items.length > 0 && items.some(i => typeof i.checked === "boolean");
+const includeFeatureList = items.length > 0 && items.some(i => i.status);
+const includeChecklistList = items.length > 0 && items.some(i => typeof i.checked === "boolean");
+const includeComparisonTable = comparison && comparison.options && comparison.options.length > 0;
 
 // If using default order, apply auto-include filters
 if (!config.components?.order) {
@@ -241,6 +296,21 @@ if (!config.components?.order) {
     if (name === "category-chart") return includeCategoryChart;
     if (name === "effort-chart") return includeEffortChart;
     if (name === "heatmap-chart") return includeHeatmap && layout.heatmapSpan > 0;
+    // Audit-only components
+    if (name === "summary-cards") return includeAuditComponents && findings.length > 0;
+    if (name === "severity-chart") return includeAuditComponents && findings.length > 0;
+    if (name === "findings-list") return includeAuditComponents && findings.length > 0;
+    if (name === "finding-controls") return includeAuditComponents && findings.length > 0;
+    if (name === "filter-sidebar") return true;
+    // Status-type components
+    if (name === "status-cards") return includeStatusCards;
+    if (name === "progress-bar") return includeProgressBar;
+    if (name === "feature-list") return includeFeatureList;
+    // Checklist-type components
+    if (name === "checklist-progress") return includeChecklistProgress;
+    if (name === "checklist-list") return includeChecklistList;
+    // Comparison-type components
+    if (name === "comparison-table") return includeComparisonTable;
     return true;
   });
 } else {
@@ -251,6 +321,12 @@ if (!config.components?.order) {
     if (name === "category-chart") return includeCategoryChart;
     if (name === "effort-chart") return includeEffortChart;
     if (name === "heatmap-chart") return includeHeatmap;
+    if (name === "status-cards") return includeStatusCards;
+    if (name === "progress-bar") return includeProgressBar;
+    if (name === "feature-list") return includeFeatureList;
+    if (name === "checklist-progress") return includeChecklistProgress;
+    if (name === "checklist-list") return includeChecklistList;
+    if (name === "comparison-table") return includeComparisonTable;
     return true;
   });
 }
@@ -295,16 +371,22 @@ for (const name of componentNames) {
   css += `\n/* ${name} */\n${comp.css}\n`;
   js += `\n// ${name}\n${comp.js}\n`;
 
-  if (name === "filter-sidebar" || name === "theme-toggle") {
+  if (name === "filter-sidebar") {
     sidebarHtml += `\n<!-- ${name} -->\n${comp.html}\n`;
-  } else if (name === "export-bar") {
+  } else if (name === "theme-toggle" || name === "export-bar") {
     headerHtml += `\n<!-- ${name} -->\n${comp.html}\n`;
   } else if (name === "verdict-banner") {
     preBentoHtml += `\n<!-- ${name} -->\n${comp.html}\n`;
+  } else if (name === "status-cards" || name === "progress-bar" || name === "checklist-progress") {
+    bentoHtml += `\n<!-- ${name} -->\n${comp.html}\n`;
   } else if (bentoComponents.includes(name)) {
     bentoHtml += `\n<!-- ${name} -->\n${comp.html}\n`;
   } else if (name === "search-bar" || name === "finding-controls" || name === "findings-list" || name === "strengths-list") {
+    // Audit-type body components go in the Findings tab
     mainBodyHtml += `\n<!-- ${name} -->\n${comp.html}\n`;
+  } else if (name === "feature-list" || name === "comparison-table" || name === "checklist-list") {
+    // Non-audit body components go in the Overview tab (active by default)
+    postBentoHtml += `\n<!-- ${name} -->\n${comp.html}\n`;
   } else {
     postBentoHtml += `\n<!-- ${name} -->\n${comp.html}\n`;
   }
@@ -315,6 +397,9 @@ let bentoCss = `
 .bento-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: ${layout.gap}; margin-bottom: 24px; }
 .bento-grid > .summary { grid-column: span 12; margin-bottom: 0; }
 .bento-grid > .stats-bar { grid-column: span 12; margin-bottom: 0; }
+.bento-grid > .status-summary { grid-column: span 8; margin-bottom: 0; }
+.bento-grid > .progress-wrap { grid-column: span 4; margin-bottom: 0; }
+.bento-grid > .checklist-progress-wrap { grid-column: span 4; margin-bottom: 0; }
 .bento-grid > .chart-card { margin-bottom: 0; }
 .bento-grid > .chart-card.severity-chart-wrap { grid-column: span ${layout.severitySpan}; }
 .bento-grid > .chart-card.category-chart-wrap { grid-column: span ${layout.categorySpan}; }
@@ -322,13 +407,19 @@ let bentoCss = `
 .bento-grid > .chart-card.heatmap-chart-wrap { grid-column: span ${layout.heatmapSpan}; }
 @media (max-width: 1100px) {
   .bento-grid > .chart-card.severity-chart-wrap,
-  .bento-grid > .chart-card.effort-chart-wrap { grid-column: span 6; }
-  .bento-grid > .chart-card.category-chart-wrap { grid-column: span 12; }
+  .bento-grid > .chart-card.effort-chart-wrap,
+  .bento-grid > .checklist-progress-wrap,
+  .bento-grid > .progress-wrap { grid-column: span 6; }
+  .bento-grid > .chart-card.category-chart-wrap,
+  .bento-grid > .status-summary { grid-column: span 12; }
 }
 @media (max-width: 700px) {
   .bento-grid > .chart-card,
   .bento-grid > .summary,
-  .bento-grid > .stats-bar { grid-column: span 12; }
+  .bento-grid > .stats-bar,
+  .bento-grid > .status-summary,
+  .bento-grid > .progress-wrap,
+  .bento-grid > .checklist-progress-wrap { grid-column: span 12; }
 }
 .main { padding: ${layout.padding}; }
 `;
@@ -341,16 +432,29 @@ if (bentoHtml) {
 }
 
 // --- Build init calls ---
-let initCalls = "\n// ===== INIT =====\ninitTheme();\nrenderSummary();\nrenderCounts();\nrenderCategories();\nbindFilters();\n";
-initCalls += `document.getElementById("tab-findings-count").textContent = ${findings.length};\n`;
-initCalls += "renderSeverityChart();\n";
+let initCalls = "\n// ===== INIT =====\ninitTheme();\n";
+if (componentNames.includes("filter-sidebar")) initCalls += "initSidebar(); bindFilters();\n";
+initCalls += `document.getElementById("tab-findings-count").textContent = ${findings.length || items.length};\n`;
+// Audit type init
+if (componentNames.includes("summary-cards")) initCalls += "renderSummary();\nrenderCounts();\n";
+if (componentNames.includes("severity-chart")) initCalls += "renderSeverityChart();\n";
 if (componentNames.includes("category-chart")) initCalls += "renderCategoryChart();\n";
 if (componentNames.includes("effort-chart")) initCalls += "renderEffortChart();\n";
 if (componentNames.includes("heatmap-chart")) initCalls += "renderHeatmap();\n";
 if (componentNames.includes("search-bar")) initCalls += "bindSearch();\n";
 if (componentNames.includes("finding-controls")) initCalls += "bindKeyboard();\n";
-initCalls += "renderFindings();\n";
+if (componentNames.includes("findings-list")) initCalls += "renderFindings();\n";
 if (componentNames.includes("strengths-list")) initCalls += "renderStrengths();\n";
+// Status type init
+if (componentNames.includes("status-cards")) initCalls += "renderStatusCards();\n";
+if (componentNames.includes("progress-bar")) initCalls += "renderProgressBar();\n";
+if (componentNames.includes("feature-list")) initCalls += "renderFeatureList();\n";
+// Checklist type init
+if (componentNames.includes("checklist-progress")) initCalls += "renderChecklistProgress();\n";
+if (componentNames.includes("checklist-list")) initCalls += "renderChecklistList();\n";
+// Comparison type init
+if (componentNames.includes("comparison-table")) initCalls += "renderComparisonTable();\n";
+// Verdict + stats
 if (componentNames.includes("verdict-banner") && config.components?.verdict) {
   const v = config.components.verdict;
   initCalls += `renderVerdict(${JSON.stringify(v.status)}, ${JSON.stringify(v.title)}, ${JSON.stringify(v.subtitle)});\n`;
@@ -358,6 +462,14 @@ if (componentNames.includes("verdict-banner") && config.components?.verdict) {
 if (componentNames.includes("stats-bar") && config.components?.stats) {
   initCalls += `renderStatsBar(${JSON.stringify(config.components.stats)});\n`;
 }
+
+// --- Hide tabs for non-audit types (everything is in Overview) ---
+const showTabs = reportType === "audit";
+const tabsCss = showTabs ? "" : `.view-tabs { display: none !important; }`;
+
+// --- Sidebar visibility ---
+const showSidebar = config.sidebar !== false && (sidebarHtml.trim() !== "" || config.brand);
+const sidebarCss = showSidebar ? "" : `.sidebar { display: none !important; } .layout { flex-direction: column; } .main { max-width: 1200px; margin: 0 auto; width: 100%; }`;
 
 // --- Branding ---
 let brandCss = "";
@@ -386,17 +498,20 @@ const customCss = config.customCss || "";
 
 // --- Assemble ---
 shell = shell
-  .replace("__REPORT_TITLE__", config.title || "Audit Report")
-  .replace(/__REPORT_TITLE__/g, config.title || "Audit Report")
+  .replace("__REPORT_TITLE__", config.title || "Report")
+  .replace(/__REPORT_TITLE__/g, config.title || "Report")
   .replace(/__REPORT_SUBTITLE__/g, config.subtitle || "")
+  .replace(/__SIDEBAR_TITLE__/g, config.sidebarTitle || config.title || "Report")
   .replace(/__GENERATED_DATE__/g, config.date || new Date().toLocaleDateString())
   .replace("__FINDINGS_JSON__", JSON.stringify(findings))
   .replace("__STRENGTHS_JSON__", JSON.stringify(strengths))
-  .replace("/* {{COMPONENT_CSS}} */", css + bentoCss + brandCss + customCss)
+  .replace("__ITEMS_JSON__", JSON.stringify(items))
+  .replace("__COMPARISON_JSON__", JSON.stringify(comparison || {}))
+  .replace("/* {{COMPONENT_CSS}} */", css + bentoCss + brandCss + customCss + tabsCss + sidebarCss)
   .replace("<!-- {{BRAND_HEADER}} -->", brandHeaderHtml)
   .replace("<!-- {{BRAND_FOOTER}} -->", brandFooterHtml)
   .replace("<!-- {{COMPONENT_SIDEBAR}} -->", sidebarHtml)
-  .replace("<!-- {{COMPONENT_HEADER}} -->", headerHtml)
+  .replace("<!-- {{COMPONENT_HEADER}} -->", headerHtml ? `<div class="header-actions">${headerHtml}</div>` : "")
   .replace("<!-- {{COMPONENT_MAIN_TOP}} -->", mainTopHtml)
   .replace("<!-- {{COMPONENT_MAIN_BODY}} -->", mainBodyHtml)
   .replace("/* {{THEME_CSS}} */", themeCss)
@@ -407,7 +522,8 @@ const outFile = outputPath || path.join(process.cwd(), "report.html");
 fs.writeFileSync(outFile, shell, "utf8");
 
 console.log(`\n  Report generated: ${outFile}`);
-console.log(`  Findings: ${findings.length} | Strengths: ${strengths.length} | Components: ${componentNames.length}`);
+const dataCount = findings.length || items.length || (comparison?.options?.length || 0);
+console.log(`  Type: ${reportType} | Items: ${dataCount} | Strengths: ${strengths.length} | Components: ${componentNames.length}`);
 console.log(`  Preset: ${presetName} | Layout: ${layoutName}${config.brand ? " | Branded" : ""}`);
 
 if (shouldOpen) {

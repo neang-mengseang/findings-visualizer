@@ -1,0 +1,83 @@
+<!-- COMPONENT: checklist-list -->
+<!-- SLOT: COMPONENT_MAIN_BODY -->
+<!-- DESCRIPTION: Interactive checklist with check/uncheck states, grouped by category. Use for release checklists and QA reports. Include when items have a "checked" boolean field. -->
+
+<!-- HTML -->
+<div class="checklist" id="checklist"></div>
+
+<!-- CSS -->
+.checklist { display: flex; flex-direction: column; gap: 24px; }
+.checklist-group h3 {
+  font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px;
+  color: var(--text-muted); margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border-subtle);
+}
+.checklist-group h3 .group-count { float: right; font-weight: 600; color: var(--text-dim); }
+.checklist-items { display: flex; flex-direction: column; gap: 4px; }
+.checklist-item {
+  display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm);
+  transition: var(--transition); cursor: pointer; box-shadow: var(--shadow);
+}
+.checklist-item:hover { border-color: var(--text-dim); box-shadow: var(--shadow-hover); }
+.checklist-item.checked { opacity: 0.6; }
+.checklist-item.checked .checklist-label { text-decoration: line-through; color: var(--text-muted); }
+.checklist-box {
+  width: 20px; height: 20px; border: 2px solid var(--text-dim); border-radius: 6px;
+  flex-shrink: 0; margin-top: 1px; transition: var(--transition);
+  display: flex; align-items: center; justify-content: center;
+}
+.checklist-item.checked .checklist-box { background: var(--low); border-color: var(--low); }
+.checklist-box svg { width: 12px; height: 12px; color: var(--bg); opacity: 0; transition: opacity 0.15s ease; }
+.checklist-item.checked .checklist-box svg { opacity: 1; }
+.checklist-content { flex: 1; }
+.checklist-label { font-size: 14px; font-weight: 500; line-height: 1.5; }
+.checklist-note { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+.checklist-item .owner { flex-shrink: 0; font-size: 11px; color: var(--text-dim); padding: 3px 8px; background: var(--surface-hover); border-radius: 20px; }
+.empty-state { text-align: center; padding: 60px 20px; color: var(--text-dim); }
+
+<!-- JS -->
+function renderChecklistList() {
+  const filtered = ITEMS
+    .filter(item => !activeCategory || item.category === activeCategory)
+    .filter(item => !activeOwner || item.owner === activeOwner);
+  const groups = {};
+  filtered.forEach(item => {
+    const cat = item.category || "General";
+    if (!groups[cat]) groups[cat] = [];
+    groups[cat].push(item);
+  });
+  const container = document.getElementById("checklist");
+  const groupNames = Object.keys(groups).sort();
+  if (groupNames.length === 0) {
+    container.innerHTML = `<div class="empty-state"><p>No checklist items.</p></div>`;
+    return;
+  }
+  container.innerHTML = groupNames.map(gname => {
+    const items = groups[gname];
+    const done = items.filter(i => i.checked).length;
+    return `
+    <div class="checklist-group">
+      <h3>${escapeHtml(gname)} <span class="group-count">${done}/${items.length}</span></h3>
+      <div class="checklist-items">
+        ${items.map(item => `
+        <div class="checklist-item${item.checked ? " checked" : ""}" onclick="toggleCheckItem('${escapeAttr(item.id)}', this)">
+          <div class="checklist-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>
+          </div>
+          <div class="checklist-content">
+            <div class="checklist-label">${escapeHtml(item.title)}</div>
+            ${item.notes ? `<div class="checklist-note">${escapeHtml(item.notes)}</div>` : ""}
+          </div>
+          ${item.owner ? `<span class="owner">${escapeHtml(item.owner)}</span>` : ""}
+        </div>`).join("")}
+      </div>
+    </div>`;
+  }).join("");
+}
+function toggleCheckItem(id, el) {
+  const item = ITEMS.find(i => i.id === id);
+  if (!item) return;
+  item.checked = !item.checked;
+  el.classList.toggle("checked");
+  renderChecklistProgress();
+}

@@ -1,0 +1,83 @@
+{
+  "title": "Search Infrastructure Comparison",
+  "subtitle": "Evaluating Elasticsearch, Typesense, and Meilisearch for Acme Commerce",
+  "date": "January 20, 2026",
+  "comparison": {
+    "options": [
+      { "name": "Elasticsearch", "verdict": "winner", "notes": "Best fit for complex faceted search at our scale. Team has prior experience operating it." },
+      { "name": "Typesense", "verdict": "runner-up", "notes": "Excellent performance and DX, but younger ecosystem. Worth revisiting in 12 months." },
+      { "name": "Meilisearch", "verdict": "alternative", "notes": "Simplest to deploy and great for small catalogs. Lacks features needed at our scale." }
+    ],
+    "criteria": [
+      { "name": "Faceted search support" },
+      { "name": "Query performance" },
+      { "name": "Indexing speed" },
+      { "name": "Operational complexity" },
+      { "name": "Team familiarity" },
+      { "name": "Ecosystem maturity" },
+      { "name": "Cost at scale" },
+      { "name": "Typo tolerance" }
+    ],
+    "optionsData": [
+      { "name": "Elasticsearch", "scores": { "Faceted search support": 10, "Query performance": 8, "Indexing speed": 7, "Operational complexity": 5, "Team familiarity": 9, "Ecosystem maturity": 10, "Cost at scale": 6, "Typo tolerance": 8 } },
+      { "name": "Typesense", "scores": { "Faceted search support": 8, "Query performance": 10, "Indexing speed": 9, "Operational complexity": 8, "Team familiarity": 4, "Ecosystem maturity": 6, "Cost at scale": 8, "Typo tolerance": 10 } },
+      { "name": "Meilisearch", "scores": { "Faceted search support": 6, "Query performance": 9, "Indexing speed": 10, "Operational complexity": 9, "Team familiarity": 3, "Ecosystem maturity": 5, "Cost at scale": 9, "Typo tolerance": 9 } }
+    ],
+    "prosCons": {
+      "Elasticsearch": {
+        "pros": [
+          "Industry standard with 15+ years of production hardening",
+          "Excellent faceted search with aggregations and nested queries",
+          "Rich query DSL supporting complex filtering and boosting",
+          "Large ecosystem: Kibana, Logstash, APM, official clients in 20+ languages",
+          "Team has 4+ years operational experience"
+        ],
+        "cons": [
+          "JVM-based, requires careful heap tuning and GC monitoring",
+          "High memory footprint, needs 8GB+ per node minimum",
+          "Operational overhead: cluster management, shard rebalancing, index lifecycle",
+          "Licensing changed after 7.10, SSPL concerns for some use cases"
+        ]
+      },
+      "Typesense": {
+        "pros": [
+          "Blazing fast, often sub-10ms for typical e-commerce queries",
+          "Built-in typo tolerance with customizable distance",
+          "Simple hosted option (Typesense Cloud) or self-hosted single binary",
+          "Clean REST API with great developer experience",
+          "Built-in curating and merchandising features"
+        ],
+        "cons": [
+          "Younger project, smaller community and fewer integrations",
+          "No equivalent to Kibana for visualization and debugging",
+          "Limited clustering story for high availability",
+          "Team would need to learn new operational patterns"
+        ]
+      },
+      "Meilisearch": {
+        "pros": [
+          "Simplest setup of all three, single binary with no dependencies",
+          "Excellent indexing speed, handles 10M+ documents easily",
+          "Great typo tolerance out of the box with no configuration",
+          "Open source with permissive MIT license",
+          "Generous free tier on Meilisearch Cloud"
+        ],
+        "cons": [
+          "Faceted search is basic compared to Elasticsearch aggregations",
+          "No complex query DSL, limited filtering and boosting options",
+          "Smaller ecosystem, fewer client libraries and integrations",
+          "No built-in analytics or visualization tools",
+          "Not battle-tested at enterprise scale yet"
+        ]
+      }
+    }
+  },
+  "preset": "architecture",
+  "layout": "default",
+  "sidebar": false,
+  "brand": {
+    "author": "Architecture Review Board",
+    "company": "Acme Commerce",
+    "footer": "Technical Decision Record - January 2026"
+  }
+}
