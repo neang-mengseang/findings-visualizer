@@ -1,7 +1,7 @@
 {
   "name": "findings-visualizer",
-  "version": "1.0.0",
-  "description": "Generate a self-contained interactive HTML dashboard from any structured findings report (security audit, code review, production readiness, performance audit).",
+  "version": "1.1.0",
+  "description": "Generate self-contained interactive HTML dashboards from any structured data: security audits, feature status trackers, release checklists, and tool comparisons.",
   "author": {
     "name": "neang-mengseang",
     "url": "https://github.com/neang-mengseang"
@@ -16,6 +16,9 @@
     "security",
     "code-review",
     "audit",
+    "checklist",
+    "comparison",
+    "status",
     "html",
     "visualization",
     "production-readiness"

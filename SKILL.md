@@ -50,18 +50,85 @@ The generated HTML is a single self-contained file with clear `<!-- component-na
 - User asks to "change the color theme" or "hide the sidebar" → edit the config and rebuild (faster, cleaner)
 - User asks for something the config doesn't support → build first, then edit the HTML
 
-## Detecting report type
+## Component-driven design
 
-The build script auto-detects the type from the data shape. You don't need to set a `type` field. But you DO need to write the right config based on what data the user gives you:
+The skill is **data-driven, not type-driven**. There are no rigid "report types" that gate which components can appear. Instead, there are three levels of control:
 
-| User data has | Report type | Config field | Data shape |
-|---------------|-------------|--------------|------------|
-| `severity` field (critical/high/medium/low) | audit | `findings` | Array of finding objects |
-| `status` field (done/in-progress/todo/blocked) | status | `items` | Array of feature/task objects |
-| `checked` boolean field | checklist | `items` | Array of checklist objects |
-| Options with scores/pros/cons | comparison | `comparison` | Object with `options`, `criteria`, `optionsData`, `prosCons` |
+### Level 1: Auto-detection (default, zero config)
+Just provide data. Components appear based on what data fields exist. If you provide `findings` with `severity`, you get severity charts and findings list. If you provide `items` with `status`, you get status cards and feature list. Mix data types freely.
 
-When the user says "visualize this audit" or "make a security report", use `findings`. When they say "track features" or "sprint status", use `items` with `status`. When they say "checklist" or "release gate", use `items` with `checked`. When they say "compare X vs Y", use `comparison`.
+### Level 2: Templates (optional shortcut)
+Set `"template": "security-audit"` to get a pre-built component layout for common report types. Templates set a default preset and component order. Any config field overrides the template default.
+
+Available templates:
+
+| Template | Preset | Use for |
+|----------|--------|---------|
+| `security-audit` | security | Security audits, penetration test reports |
+| `code-review` | code-quality | Code reviews, lint reports, tech debt |
+| `feature-status` | default | Feature trackers, sprint status, roadmaps |
+| `release-checklist` | code-quality | Release gates, QA checklists, deployment readiness |
+| `comparison` | architecture | Tool comparison, vendor evaluation, architecture decisions |
+| `performance-audit` | performance | Performance audits, load test reports |
+| `architecture-review` | architecture | Architecture reviews, design audits |
+
+```json
+{
+  "title": "Security Audit",
+  "findings": "findings.json",
+  "template": "security-audit",
+  "components": {
+    "verdict": { "status": "fail", "title": "NOT READY", "subtitle": "3 criticals" }
+  }
+}
+```
+
+### Level 3: Full manual control
+Set `components.order` to explicitly list which components to include and in what order. This overrides both auto-detection and templates entirely.
+
+```json
+{
+  "title": "Custom Report",
+  "findings": "findings.json",
+  "items": "checklist.json",
+  "components": {
+    "order": ["verdict-banner", "summary-cards", "findings-list", "checklist-progress", "checklist-list"]
+  }
+}
+```
+
+### Data shapes and what they trigger
+
+| Data field | What it contains | Components it triggers |
+|------------|-----------------|----------------------|
+| `findings` with `severity` | Audit findings | summary-cards, severity-chart, findings-list, finding-controls, filter-sidebar |
+| `items` with `status` | Feature/task tracking | status-cards, progress-bar, feature-list, filter-sidebar |
+| `items` with `checked` | Checklist items | checklist-progress, checklist-list, filter-sidebar |
+| `comparison` with `options` | Tool/option comparison | comparison-table |
+| `strengths` | Positive highlights | strengths-list |
+| `components.verdict` | Pass/warn/fail verdict | verdict-banner |
+| `components.stats` | Custom metric cards | stats-bar |
+| `findings` with `category` | Category grouping | category-chart, heatmap-chart |
+| `findings` with `effort` | Effort estimates | effort-chart |
+
+### Mixing data types
+
+You can provide multiple data fields in one config. All relevant components will appear:
+
+```json
+{
+  "title": "Security Audit with Fix Checklist",
+  "findings": "audit-findings.json",
+  "items": "fix-checklist.json",
+  "strengths": ["Good auth patterns"],
+  "preset": "security",
+  "components": {
+    "verdict": { "status": "fail", "title": "NOT READY", "subtitle": "3 criticals" }
+  }
+}
+```
+
+This produces a report with: verdict banner, summary cards, severity chart, findings list, checklist progress, checklist list, strengths, and sidebar filters. All from one config.
 
 ## Step 1: Data JSON
 

@@ -54,28 +54,28 @@ Instead of sharing findings as a wall of markdown text, this skill generates a s
 Works with Claude Code, Cursor, Cline, Windsurf, Gemini CLI, Devin, and 48+ other agent surfaces.
 
 ```bash
-npx skills add neang-neang-mengseang/findings-visualizer
+npx skills add neang-mengseang/findings-visualizer
 ```
 
 That's it. The skill lands in your local skills directory and is ready to use. No clone, no build, no config.
 
 Pin to a specific version:
 ```bash
-npx skills add neang-neang-mengseang/findings-visualizer@1.1.0
+npx skills add neang-mengseang/findings-visualizer@1.1.0
 ```
 
 ### Option 2: Install script (for manual / offline installs)
 
 **Windows (PowerShell):**
 ```powershell
-git clone https://github.com/neang-neang-mengseang/findings-visualizer.git
+git clone https://github.com/neang-mengseang/findings-visualizer.git
 cd findings-visualizer
 .\scripts\install.ps1
 ```
 
 **macOS / Linux (bash):**
 ```bash
-git clone https://github.com/neang-neang-mengseang/findings-visualizer.git
+git clone https://github.com/neang-mengseang/findings-visualizer.git
 cd findings-visualizer
 chmod +x scripts/install.sh
 ./scripts/install.sh
@@ -92,7 +92,7 @@ chmod +x scripts/install.sh
 ### Option 3: Claude Code plugin marketplace
 
 ```bash
-/plugin marketplace add neang-neang-mengseang/findings-visualizer
+/plugin marketplace add neang-mengseang/findings-visualizer
 /plugin install findings-visualizer
 ```
 
@@ -199,6 +199,33 @@ For status/checklist, use `items` instead of `findings`. For comparison, use `co
 ```
 
 See SKILL.md for the full config reference including all 4 data formats.
+
+## Templates
+
+Templates are optional shortcuts for common report types. They set a default preset and component layout. Any config field overrides the template.
+
+| Template | Preset | Use for |
+|----------|--------|---------|
+| `security-audit` | security | Security audits, penetration test reports |
+| `code-review` | code-quality | Code reviews, lint reports, tech debt |
+| `feature-status` | default | Feature trackers, sprint status, roadmaps |
+| `release-checklist` | code-quality | Release gates, QA checklists, deployment readiness |
+| `comparison` | architecture | Tool comparison, vendor evaluation, architecture decisions |
+| `performance-audit` | performance | Performance audits, load test reports |
+| `architecture-review` | architecture | Architecture reviews, design audits |
+
+```json
+{
+  "title": "Security Audit",
+  "findings": "findings.json",
+  "template": "security-audit",
+  "components": {
+    "verdict": { "status": "fail", "title": "NOT READY", "subtitle": "3 criticals" }
+  }
+}
+```
+
+Templates are optional. Without a template, the build script auto-detects which components to show based on what data you provide. You can also use `components.order` for full manual control. See SKILL.md for details.
 
 ## Color presets
 

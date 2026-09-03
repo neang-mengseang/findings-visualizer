@@ -255,10 +255,75 @@ themeCss += "}\n";
 const layoutName = config.layout || "default";
 const layout = LAYOUTS[layoutName] || LAYOUTS.default;
 
+// --- Templates (optional shortcuts for common report types) ---
+const TEMPLATES = {
+  "security-audit": {
+    preset: "security",
+    components: {
+      order: ["verdict-banner", "summary-cards", "stats-bar", "severity-chart", "category-chart", "effort-chart", "heatmap-chart", "search-bar", "finding-controls", "findings-list", "strengths-list", "filter-sidebar", "export-bar", "theme-toggle"]
+    }
+  },
+  "code-review": {
+    preset: "code-quality",
+    components: {
+      order: ["verdict-banner", "summary-cards", "severity-chart", "category-chart", "search-bar", "finding-controls", "findings-list", "strengths-list", "filter-sidebar", "export-bar", "theme-toggle"]
+    }
+  },
+  "feature-status": {
+    preset: "default",
+    components: {
+      order: ["status-cards", "progress-bar", "feature-list", "filter-sidebar", "export-bar", "theme-toggle"]
+    }
+  },
+  "release-checklist": {
+    preset: "code-quality",
+    components: {
+      order: ["checklist-progress", "checklist-list", "filter-sidebar", "export-bar", "theme-toggle"]
+    }
+  },
+  "comparison": {
+    preset: "architecture",
+    sidebar: false,
+    components: {
+      order: ["comparison-table", "export-bar", "theme-toggle"]
+    }
+  },
+  "performance-audit": {
+    preset: "performance",
+    components: {
+      order: ["verdict-banner", "summary-cards", "stats-bar", "severity-chart", "category-chart", "effort-chart", "search-bar", "finding-controls", "findings-list", "strengths-list", "filter-sidebar", "export-bar", "theme-toggle"]
+    }
+  },
+  "architecture-review": {
+    preset: "architecture",
+    components: {
+      order: ["verdict-banner", "summary-cards", "severity-chart", "category-chart", "effort-chart", "heatmap-chart", "search-bar", "finding-controls", "findings-list", "strengths-list", "filter-sidebar", "export-bar", "theme-toggle"]
+    }
+  }
+};
+
+// Apply template if specified (template provides defaults, config overrides)
+let templateConfig = {};
+if (config.template && TEMPLATES[config.template]) {
+  templateConfig = TEMPLATES[config.template];
+  // Template provides default preset, but config.preset overrides
+  if (!config.preset && templateConfig.preset) config.preset = templateConfig.preset;
+  // Template provides default sidebar, but config.sidebar overrides
+  if (config.sidebar === undefined && templateConfig.sidebar !== undefined) {
+    config.sidebar = templateConfig.sidebar;
+  }
+}
+
 // --- Determine component order + inclusion ---
+// Priority: config.components.order > template.components.order > DEFAULT_ORDER (auto-detect)
 let componentNames;
 if (config.components?.order && Array.isArray(config.components.order)) {
   componentNames = config.components.order;
+} else if (templateConfig.components?.order) {
+  componentNames = [...templateConfig.components.order];
+  if (config.components?.hide && Array.isArray(config.components.hide)) {
+    componentNames = componentNames.filter(n => !config.components.hide.includes(n));
+  }
 } else {
   componentNames = [...DEFAULT_ORDER];
   if (config.components?.hide && Array.isArray(config.components.hide)) {
@@ -266,19 +331,19 @@ if (config.components?.order && Array.isArray(config.components.order)) {
   }
 }
 
-// Auto-include logic: if using default order, auto-add/remove based on data
+// Auto-include logic: data-driven, not type-driven
+// Any component shows if its data exists, regardless of "report type"
 const includeSearch = (findings.length > 5) || (items.length > 5);
 const includeVerdict = config.components?.verdict !== undefined && config.components?.verdict !== false;
 const includeStats = config.components?.stats !== undefined && config.components?.stats !== false;
 const includeStrengths = Array.isArray(strengths) && strengths.length > 0;
-const includeCategoryChart = findings.some(f => f.category);
+const includeCategoryChart = findings.some(f => f.category) || items.some(i => i.category);
 const includeEffortChart = findings.some(f => f.effort);
 const includeHeatmap = findings.some(f => f.category) && findings.some(f => f.severity);
-
-// Type-specific auto-include
-const includeAuditComponents = reportType === "audit";
-const includeStatusComponents = reportType === "status" || reportType === "checklist";
-const includeComparisonComponents = reportType === "comparison";
+const includeSummaryCards = findings.length > 0 && findings.some(f => f.severity);
+const includeSeverityChart = findings.length > 0 && findings.some(f => f.severity);
+const includeFindingsList = findings.length > 0;
+const includeFindingControls = findings.length > 0;
 const includeStatusCards = items.length > 0 && items.some(i => i.status);
 const includeProgressBar = items.length > 0 && items.some(i => i.status);
 const includeChecklistProgress = items.length > 0 && items.some(i => typeof i.checked === "boolean");
@@ -286,7 +351,7 @@ const includeFeatureList = items.length > 0 && items.some(i => i.status);
 const includeChecklistList = items.length > 0 && items.some(i => typeof i.checked === "boolean");
 const includeComparisonTable = comparison && comparison.options && comparison.options.length > 0;
 
-// If using default order, apply auto-include filters
+// If using default order, auto-include based on data presence
 if (!config.components?.order) {
   componentNames = componentNames.filter(name => {
     if (name === "verdict-banner") return includeVerdict;
@@ -296,36 +361,26 @@ if (!config.components?.order) {
     if (name === "category-chart") return includeCategoryChart;
     if (name === "effort-chart") return includeEffortChart;
     if (name === "heatmap-chart") return includeHeatmap && layout.heatmapSpan > 0;
-    // Audit-only components
-    if (name === "summary-cards") return includeAuditComponents && findings.length > 0;
-    if (name === "severity-chart") return includeAuditComponents && findings.length > 0;
-    if (name === "findings-list") return includeAuditComponents && findings.length > 0;
-    if (name === "finding-controls") return includeAuditComponents && findings.length > 0;
+    if (name === "summary-cards") return includeSummaryCards;
+    if (name === "severity-chart") return includeSeverityChart;
+    if (name === "findings-list") return includeFindingsList;
+    if (name === "finding-controls") return includeFindingControls;
     if (name === "filter-sidebar") return true;
-    // Status-type components
     if (name === "status-cards") return includeStatusCards;
     if (name === "progress-bar") return includeProgressBar;
     if (name === "feature-list") return includeFeatureList;
-    // Checklist-type components
     if (name === "checklist-progress") return includeChecklistProgress;
     if (name === "checklist-list") return includeChecklistList;
-    // Comparison-type components
     if (name === "comparison-table") return includeComparisonTable;
     return true;
   });
 } else {
-  // If custom order, still filter out components that don't have data
+  // Custom order: include everything specified, only filter if data is completely missing
   componentNames = componentNames.filter(name => {
-    if (name === "search-bar") return includeSearch;
     if (name === "strengths-list") return includeStrengths;
     if (name === "category-chart") return includeCategoryChart;
     if (name === "effort-chart") return includeEffortChart;
     if (name === "heatmap-chart") return includeHeatmap;
-    if (name === "status-cards") return includeStatusCards;
-    if (name === "progress-bar") return includeProgressBar;
-    if (name === "feature-list") return includeFeatureList;
-    if (name === "checklist-progress") return includeChecklistProgress;
-    if (name === "checklist-list") return includeChecklistList;
     if (name === "comparison-table") return includeComparisonTable;
     return true;
   });
