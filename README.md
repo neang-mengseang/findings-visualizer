@@ -2,6 +2,19 @@
 
 <p align="center"><img src="assets/logo/logo-nobg.png" width="200" alt="Findings Visualizer"></p>
 
+<p align="center">
+  <a href="https://neang-mengseang.github.io/findings-visualizer/">Website</a> &middot;
+  <a href="https://github.com/neang-mengseang/findings-visualizer/releases">Releases</a> &middot;
+  <a href="https://github.com/neang-mengseang/findings-visualizer/blob/main/SKILL.md">Documentation</a> &middot;
+  <a href="#install">Install</a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/neang-mengseang/findings-visualizer/releases"><img src="https://img.shields.io/github/v/release/neang-mengseang/findings-visualizer" alt="Release"></a>
+  <img src="https://img.shields.io/github/license/neang-mengseang/findings-visualizer" alt="License">
+  <img src="https://img.shields.io/github/stars/neang-mengseang/findings-visualizer?style=social" alt="Stars">
+</p>
+
 A Devin / Claude Code skill that turns any structured report into a self-contained, interactive HTML dashboard. Four report types supported: security audits, feature status trackers, release checklists, and tool comparisons.
 
 ## Screenshots
@@ -29,6 +42,8 @@ Instead of sharing findings as a wall of markdown text, this skill generates a s
 - **Comparison** - options scored across criteria with pros/cons. Tool selection, architecture decisions, vendor comparison.
 
 **Features:**
+- Component-driven architecture: any component can mix with any data
+- 7 optional templates for common report types (or use auto-detection)
 - Adaptive sidebar with live filters (severity, status, category, assignee, owner)
 - Mini progress ring and quick stats in the sidebar
 - Light/dark theme toggle with circular reveal animation (always visible in header)
@@ -46,6 +61,7 @@ Instead of sharing findings as a wall of markdown text, this skill generates a s
 - 4 layout presets (default, compact, charts-first, list-first)
 - Branding: author, company, logo, footer
 - Optional sidebar (hide with `"sidebar": false`)
+- 20 composable components
 - Custom CSS escape hatch for full control
 - Works offline, single file, zero external dependencies
 
