@@ -28,39 +28,6 @@ Instead of sharing audit findings as a wall of markdown text, this skill generat
 - Custom CSS escape hatch for full control
 - Works offline, single file, zero external dependencies
 
-## Block-by-block architecture
-
-The report is assembled from reusable components by a build script. The AI writes a small config JSON + findings JSON, runs one command, gets a finished report.
-
-```
-audit-report-viewer/
-├── SKILL.md                         # Skill instructions (AI reads this)
-├── scripts/
-│   └── build.js                     # Assembles shell + components into one HTML file
-├── assets/
-│   ├── shell.html                   # Base document: layout, CSS variables, print styles, slots
-│   └── components/
-│       ├── verdict-banner.html      # Pass/fail/warn banner (optional)
-│       ├── summary-cards.html       # Severity count cards (always)
-│       ├── stats-bar.html           # Custom metric cards (optional)
-│       ├── severity-chart.html      # Donut chart (always)
-│       ├── category-chart.html      # Horizontal bar chart (if categories)
-│       ├── effort-chart.html        # Fix effort bars (if effort data)
-│       ├── heatmap-chart.html       # Severity x category grid (if both)
-│       ├── filter-sidebar.html      # Severity + category filters (always)
-│       ├── search-bar.html          # Text search (if >5 findings)
-│       ├── finding-controls.html    # Sort + expand/collapse all (always)
-│       ├── findings-list.html       # Expandable finding cards (always)
-│       ├── strengths-list.html      # Collapsible positive findings (optional)
-│       ├── theme-toggle.html        # Light/dark switch (always)
-│       └── export-bar.html          # JSON download + Print/PDF (always)
-└── examples/
-    ├── sample-config.json
-    └── sample-findings.json
-```
-
-Each component is self-contained: its HTML, CSS, and JS live in one file with clear delimiters. New components can be added without touching existing ones.
-
 ## Install
 
 ### Option 1: skills.sh (recommended, all agents)
@@ -68,28 +35,28 @@ Each component is self-contained: its HTML, CSS, and JS live in one file with cl
 Works with Claude Code, Cursor, Cline, Windsurf, Gemini CLI, Devin, and 48+ other agent surfaces.
 
 ```bash
-npx skills add mengseang/audit-report-viewer
+npx skills add neang-mengseang/audit-report-viewer
 ```
 
 That's it. The skill lands in your local skills directory and is ready to use. No clone, no build, no config.
 
 Pin to a specific version:
 ```bash
-npx skills add mengseang/audit-report-viewer@1.0.0
+npx skills add neang-mengseang/audit-report-viewer@1.0.0
 ```
 
 ### Option 2: Install script (for manual / offline installs)
 
 **Windows (PowerShell):**
 ```powershell
-git clone https://github.com/mengseang/audit-report-viewer.git
+git clone https://github.com/neang-mengseang/audit-report-viewer.git
 cd audit-report-viewer
 .\scripts\install.ps1
 ```
 
 **macOS / Linux (bash):**
 ```bash
-git clone https://github.com/mengseang/audit-report-viewer.git
+git clone https://github.com/neang-mengseang/audit-report-viewer.git
 cd audit-report-viewer
 chmod +x scripts/install.sh
 ./scripts/install.sh
@@ -106,7 +73,7 @@ chmod +x scripts/install.sh
 ### Option 3: Claude Code plugin marketplace
 
 ```bash
-/plugin marketplace add mengseang/audit-report-viewer
+/plugin marketplace add neang-mengseang/audit-report-viewer
 /plugin install audit-report-viewer
 ```
 
@@ -248,27 +215,6 @@ Each preset has tuned colors for both dark and light mode. Override any color wi
 ```
 
 Only `id`, `title`, and `severity` are required. Everything else is optional and gracefully omitted if missing.
-
-## Creating custom components
-
-Create a new `.html` file in `assets/components/` following this format:
-
-```html
-<!-- COMPONENT: my-block -->
-<!-- SLOT: COMPONENT_MAIN_TOP -->
-<!-- DESCRIPTION: when to include it -->
-
-<!-- HTML -->
-<div class="my-block"></div>
-
-<!-- CSS -->
-.my-block { ... }
-
-<!-- JS -->
-function renderMyBlock() { ... }
-```
-
-Add the component name to `DEFAULT_ORDER` in `scripts/build.js`. The build script picks it up automatically.
 
 ## License
 
