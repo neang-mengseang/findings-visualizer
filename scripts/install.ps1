@@ -63,7 +63,7 @@ $files = @(
   "plugin.json",
   "marketplace.json",
   "assets\shell.html",
-  "assets\logo\logo.png",
+  "assets\logo\logo-nobg.png",
   "assets\components\verdict-banner.html",
   "assets\components\summary-cards.html",
   "assets\components\stats-bar.html",

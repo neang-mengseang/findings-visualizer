@@ -7,7 +7,7 @@
       "source": "github:neang-mengseang/findings-visualizer",
       "description": "Generate self-contained interactive HTML dashboards from any structured data: security audits, feature status trackers, release checklists, and tool comparisons.",
       "version": "1.1.0",
-      "icon": "assets/logo/logo.png",
+      "icon": "assets/logo/logo-nobg.png",
       "categories": ["developer-tools", "code-quality", "security"],
       "keywords": ["findings", "report", "dashboard", "visualizer", "security", "audit", "checklist", "comparison", "status", "html"]
     }
