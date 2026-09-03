@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# audit-report-viewer install script (bash)
+# findings-visualizer install script (bash)
 # Usage:
 #   ./scripts/install.sh                    # install to default Devin skill dir
 #   ./scripts/install.sh /custom/path       # install to custom dir
@@ -8,7 +8,7 @@
 
 set -e
 
-SKILL_NAME="audit-report-viewer"
+SKILL_NAME="findings-visualizer"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SOURCE_DIR="$(dirname "$SCRIPT_DIR")"
 
@@ -22,7 +22,7 @@ for arg in "$@"; do
     --claude) CLAUDE=true ;;
     --help|-h)
       echo ""
-      echo "  audit-report-viewer installer"
+      echo "  findings-visualizer installer"
       echo ""
       echo "  Usage:"
       echo "    ./scripts/install.sh                Install to ~/.config/devin/skills/"
@@ -46,7 +46,7 @@ if [ -z "$TARGET" ]; then
 fi
 
 echo ""
-echo "  \033[36maudit-report-viewer installer\033[0m"
+echo "  \033[36mfindings-visualizer installer\033[0m"
 echo "  \033[90m-----------------------------\033[0m"
 echo "  Source:  $SOURCE_DIR"
 echo "  Target:  $TARGET"
@@ -90,16 +90,23 @@ copy_file() {
 
 echo "  \033[90mCopying files...\033[0m"
 copy_file "SKILL.md"
+copy_file "plugin.json"
+copy_file "marketplace.json"
 copy_file "assets/shell.html"
 copy_file "assets/components/verdict-banner.html"
 copy_file "assets/components/summary-cards.html"
 copy_file "assets/components/stats-bar.html"
+copy_file "assets/components/severity-chart.html"
+copy_file "assets/components/category-chart.html"
+copy_file "assets/components/effort-chart.html"
+copy_file "assets/components/heatmap-chart.html"
 copy_file "assets/components/filter-sidebar.html"
 copy_file "assets/components/search-bar.html"
+copy_file "assets/components/finding-controls.html"
 copy_file "assets/components/findings-list.html"
+copy_file "assets/components/strengths-list.html"
 copy_file "assets/components/theme-toggle.html"
 copy_file "assets/components/export-bar.html"
-copy_file "assets/components/strengths-list.html"
 
 # Verify
 echo ""

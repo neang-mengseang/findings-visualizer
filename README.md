@@ -1,4 +1,4 @@
-# Audit Report Viewer
+# Findings Visualizer
 
 A Devin / Claude Code skill that turns any structured findings report into a self-contained, interactive HTML dashboard.
 
@@ -35,29 +35,29 @@ Instead of sharing audit findings as a wall of markdown text, this skill generat
 Works with Claude Code, Cursor, Cline, Windsurf, Gemini CLI, Devin, and 48+ other agent surfaces.
 
 ```bash
-npx skills add neang-mengseang/audit-report-viewer
+npx skills add neang-neang-mengseang/findings-visualizer
 ```
 
 That's it. The skill lands in your local skills directory and is ready to use. No clone, no build, no config.
 
 Pin to a specific version:
 ```bash
-npx skills add neang-mengseang/audit-report-viewer@1.0.0
+npx skills add neang-neang-mengseang/findings-visualizer@1.0.0
 ```
 
 ### Option 2: Install script (for manual / offline installs)
 
 **Windows (PowerShell):**
 ```powershell
-git clone https://github.com/neang-mengseang/audit-report-viewer.git
-cd audit-report-viewer
+git clone https://github.com/neang-neang-mengseang/findings-visualizer.git
+cd findings-visualizer
 .\scripts\install.ps1
 ```
 
 **macOS / Linux (bash):**
 ```bash
-git clone https://github.com/neang-mengseang/audit-report-viewer.git
-cd audit-report-viewer
+git clone https://github.com/neang-neang-mengseang/findings-visualizer.git
+cd findings-visualizer
 chmod +x scripts/install.sh
 ./scripts/install.sh
 ```
@@ -73,27 +73,27 @@ chmod +x scripts/install.sh
 ### Option 3: Claude Code plugin marketplace
 
 ```bash
-/plugin marketplace add neang-mengseang/audit-report-viewer
-/plugin install audit-report-viewer
+/plugin marketplace add neang-neang-mengseang/findings-visualizer
+/plugin install findings-visualizer
 ```
 
 ### Option 4: Manual install
 
-Copy the entire `audit-report-viewer/` directory to your skills folder:
+Copy the entire `findings-visualizer/` directory to your skills folder:
 
 | Platform | Devin skills path |
 |----------|-------------------|
-| Windows | `C:\Users\<you>\AppData\Roaming\devin\skills\audit-report-viewer\` |
-| macOS | `~/.config/devin/skills/audit-report-viewer/` |
-| Linux | `~/.config/devin/skills/audit-report-viewer/` |
+| Windows | `C:\Users\<you>\AppData\Roaming\devin\skills\findings-visualizer\` |
+| macOS | `~/.config/devin/skills/findings-visualizer/` |
+| Linux | `~/.config/devin/skills/findings-visualizer/` |
 
-For project-local skills, copy to `.devin/skills/audit-report-viewer/` in your project root.
+For project-local skills, copy to `.devin/skills/findings-visualizer/` in your project root.
 
 ### Verify install
 
 After installing, the skill directory should contain:
 ```
-audit-report-viewer/
+findings-visualizer/
 ├── SKILL.md
 ├── plugin.json
 ├── scripts/build.js

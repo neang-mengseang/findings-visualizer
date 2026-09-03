@@ -1,4 +1,4 @@
-# audit-report-viewer install script (PowerShell)
+# findings-visualizer install script (PowerShell)
 # Usage:
 #   .\scripts\install.ps1                    # install to default Devin skill dir
 #   .\scripts\install.ps1 -Target "C:\path"  # install to custom dir
@@ -11,7 +11,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
-$skillName = "audit-report-viewer"
+$skillName = "findings-visualizer"
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $sourceDir = Split-Path -Parent $scriptDir
 
@@ -29,7 +29,7 @@ if ($Target -eq "") {
 $destPath = $Target
 
 Write-Host ""
-Write-Host "  audit-report-viewer installer" -ForegroundColor Cyan
+Write-Host "  findings-visualizer installer" -ForegroundColor Cyan
 Write-Host "  -----------------------------" -ForegroundColor DarkGray
 Write-Host "  Source:  $sourceDir"
 Write-Host "  Target:  $destPath"
@@ -60,16 +60,23 @@ New-Item -ItemType Directory -Path $destPath -Force | Out-Null
 # Copy files
 $files = @(
   "SKILL.md",
+  "plugin.json",
+  "marketplace.json",
   "assets\shell.html",
   "assets\components\verdict-banner.html",
   "assets\components\summary-cards.html",
   "assets\components\stats-bar.html",
+  "assets\components\severity-chart.html",
+  "assets\components\category-chart.html",
+  "assets\components\effort-chart.html",
+  "assets\components\heatmap-chart.html",
   "assets\components\filter-sidebar.html",
   "assets\components\search-bar.html",
+  "assets\components\finding-controls.html",
   "assets\components\findings-list.html",
+  "assets\components\strengths-list.html",
   "assets\components\theme-toggle.html",
-  "assets\components\export-bar.html",
-  "assets\components\strengths-list.html"
+  "assets\components\export-bar.html"
 )
 
 $copied = 0

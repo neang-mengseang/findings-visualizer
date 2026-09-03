@@ -1,5 +1,5 @@
 ---
-name: audit-report-viewer
+name: findings-visualizer
 description: >-
   Generate a self-contained interactive visual dashboard from any structured
   findings report (security audit, code review, production readiness, performance
@@ -10,7 +10,7 @@ description: >-
   says "report viewer", "findings dashboard", or "make this report look good".
 ---
 
-# Audit Report Viewer
+# Findings Visualizer
 
 Turn any structured findings report into a self-contained, interactive visual dashboard. The AI writes a small JSON config + findings file, runs one command, gets a finished report.
 
