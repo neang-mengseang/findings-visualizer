@@ -15,3 +15,6 @@ node_modules/
 # Generated reports (don't commit output)
 report.html
 *.report.html
+
+# Packaging output
+*.skill
